@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "cobblests",
+  "version": "${version}",
+  "name": "CobbleSTS",
+  "description": "",
+  "authors": [
+    "zonary123"
+  ],
+  "contact": {
+    "github": "https://github.com/zonary123/Cobblehunt"
+  },
+  "license": "MIT",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.kingpixel.fabric.cobblests.FabricModExample"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.22",
+    "minecraft": ">=1.20.1"
+  }
+}
