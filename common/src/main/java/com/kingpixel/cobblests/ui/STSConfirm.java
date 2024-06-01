@@ -11,6 +11,7 @@ import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobblests.utils.STSUtil;
 import com.kingpixel.cobblests.utils.TextUtil;
 import com.kingpixel.cobblests.utils.Utils;
+import net.minecraft.network.chat.Component;
 
 import java.util.Objects;
 
@@ -26,7 +27,7 @@ public class STSConfirm {
     GooeyButton confirm = GooeyButton.builder()
       .display(Utils.parseItemId(CobbleSTS.language.getConfirm().getId()))
       .title(TextUtil.parseHexCodes(CobbleSTS.language.getConfirm().getTitle()))
-      .lore(CobbleSTS.language.getConfirm().getLore())
+      .lore(Component.class, TextUtil.parseHexCodes(CobbleSTS.language.getConfirm().getLore()))
       .onClick(action -> {
         STSUtil.Sell(pokemon, true, action.getPlayer(), index);
         try {
@@ -39,14 +40,14 @@ public class STSConfirm {
 
     GooeyButton pokebutton = GooeyButton.builder()
       .display(PokemonItem.from(pokemon))
-      .title(pokemon.getSpecies().getName())
-      .lore(STSUtil.formatPokemonLore(pokemon))
+      .title(TextUtil.parseHexCodes(pokemon.getSpecies().getName()))
+      .lore(Component.class, TextUtil.parseHexCodes(STSUtil.formatPokemonLore(pokemon)))
       .build();
 
     GooeyButton cancel = GooeyButton.builder()
       .display(Utils.parseItemId(CobbleSTS.language.getCancel().getId()))
       .title(TextUtil.parseHexCodes(CobbleSTS.language.getCancel().getTitle()))
-      .lore(CobbleSTS.language.getCancel().getLore())
+      .lore(Component.class, TextUtil.parseHexCodes(CobbleSTS.language.getCancel().getLore()))
       .build();
 
 

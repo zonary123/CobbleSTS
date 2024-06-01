@@ -1,6 +1,5 @@
 package com.kingpixel.cobblests.utils;
 
-import com.kingpixel.cobblests.CobbleSTS;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -12,9 +11,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextUtil {
-  private static final Pattern HEXPATTERN = Pattern.compile("\\{(#[a-fA-F0-9]{6})}");
-  private static final Pattern GRADIENTPATTERN = Pattern.compile("\\{(#[a-fA-F0-9]{6})>(#[a-fA-F0-9]{6})\\}");
-  private static final String SPLITPATTERN = "((?=\\{#[a-fA-F0-9]{6}})|(?=\\{#[a-fA-F0-9]{6}>#[a-fA-F0-9]{6}\\}))";
+  private static final Pattern HEXPATTERN = Pattern.compile("\\{(#[a-fA-F0-9]{3,6})}");
+  private static final Pattern GRADIENTPATTERN = Pattern.compile("\\{(#[a-fA-F0-9]{3,6})>(#[a-fA-F0-9]{3,6})\\}");
+  private static final String SPLITPATTERN = "((?=\\{#[a-fA-F0-9]{3,6}})|(?=\\{#[a-fA-F0-9]{3,6}>#[a-fA-F0-9]{3,6}\\}))";
 
   public static Component parseHexCodes(String text) {
     if (text == null) return null;
@@ -70,24 +69,17 @@ public class TextUtil {
     return comp;
   }
 
-  public static List<String> parseHexCodes(List<String> textList) {
+  public static List<Component> parseHexCodes(List<String> textList) {
     if (textList == null) return null;
 
-    List<String> result = new ArrayList<>();
+    List<Component> result = new ArrayList<>();
     int size = textList.size();
 
-    for (int i = 0; i < size; i++) {
-      String text = textList.get(i);
+    for (String text : textList) {
       text = text.replace("&", "§"); // Replace & with §
       Component comp = parseHexCodes(text);
-      if (i < size - 1) {
-        result.add(comp.getString() + "\n");
-      } else {
-        result.add(comp.getString());
-      }
-      CobbleSTS.server.sendSystemMessage(Component.literal(result.get(i)));
+      result.add(comp);
     }
-
     return result;
   }
 

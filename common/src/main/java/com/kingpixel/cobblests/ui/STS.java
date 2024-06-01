@@ -14,6 +14,7 @@ import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobblests.utils.STSUtil;
 import com.kingpixel.cobblests.utils.TextUtil;
 import com.kingpixel.cobblests.utils.Utils;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Objects;
@@ -40,7 +41,7 @@ public class STS {
       GooeyButton info = GooeyButton.builder()
         .display(Utils.parseItemId(CobbleSTS.language.getInfo().getId()))
         .title(TextUtil.parseHexCodes(CobbleSTS.language.getInfo().getTitle()))
-        .lore(CobbleSTS.language.getInfo().getLore())
+        .lore(Component.class, TextUtil.parseHexCodes(CobbleSTS.language.getInfo().getLore()))
         .build();
 
       RateLimitedButton poke4 = createButtonPokemon(partyStore.get(3), 3);
@@ -74,7 +75,8 @@ public class STS {
       if (pokemon != null) {
         poke = GooeyButton.builder()
           .display(PokemonItem.from(pokemon))
-          .lore(TextUtil.parseHexCodes(STSUtil.formatPokemonLore(pokemon)))
+          .title(TextUtil.parseHexCodes(CobbleSTS.language.getColorhexnamepoke() + pokemon.getSpecies().getName()))
+          .lore(Component.class, TextUtil.parseHexCodes(STSUtil.formatPokemonLore(pokemon)))
           .onClick((action) -> UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSConfirm.open(
             pokemon, index))))
           .build();
@@ -82,7 +84,7 @@ public class STS {
         poke = GooeyButton.builder()
           .display(Utils.parseItemId(CobbleSTS.language.getNopokemon().getId()))
           .title(TextUtil.parseHexCodes(CobbleSTS.language.getNopokemon().getTitle()))
-          .lore(CobbleSTS.language.getNopokemon().getLore())
+          .lore(Component.class, TextUtil.parseHexCodes(CobbleSTS.language.getNopokemon().getLore()))
           .build();
       }
     } catch (Exception e) {

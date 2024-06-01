@@ -22,6 +22,7 @@ public class Lang {
   private String fill;
   private String yes;
   private String no;
+  private String colorhexnamepoke;
   private String descLevel;
   private String descShiny;
   private String descLegendary;
@@ -46,11 +47,12 @@ public class Lang {
 
   public Lang() {
     prefix = "{#E39651}CobbleSpawnNotify {#EA814F}»";
-    reload = "{#E39651}The plugin has been reloaded!";
-    title = "{#E39651}CobbleSTS";
-    titleconfirm = "{#E39651}Confirm";
-    sell = "{#E39651}Sell %pokemon% for %price%?";
+    reload = "%prefix% {#ff7900>#ffdbba}The plugin has been reloaded!";
+    title = "{#ff7900>#ffdbba}CobbleSTS";
+    titleconfirm = "{#ff7900>#ffdbba}Confirm";
+    sell = "{#E39651>#f2c49b}Sell %pokemon% for %price%?";
     fill = "minecraft:gray_stained_glass_pane";
+    colorhexnamepoke = "{#ff7900>#ffdbba}";
     descLevel = "§7Level: §e%level%";
     descShiny = "§7Shiny: §e%shiny%";
     descLegendary = "§7Legendary: §e%legendary%";
@@ -65,15 +67,15 @@ public class Lang {
     descprice = "§7Price: §e%price%";
     yes = "Yes";
     no = "No";
-    info = new ItemModel("minecraft:book", "{#E39651}Info", List.of(""));
-    nopokemon = new ItemModel("cobblemon:poke_ball", "{#E39651}No Pokemon", List.of(""));
-    confirm = new ItemModel("minecraft:lime_stained_grass_pane", "{#E39651}Confirm", List.of(""));
-    cancel = new ItemModel("minecraft:red_stained_grass_pane", "{#E39651}Cancel", List.of(""));
+    info = new ItemModel("minecraft:book", "{#ff7900>#ffdbba}Info Price", List.of(""));
+    nopokemon = new ItemModel("cobblemon:poke_ball", "{#db2e2e>#e68c8c}Empty slot", List.of(""));
+    confirm = new ItemModel("minecraft:lime_stained_grass_pane", "{#3ec758>#a2f2b2}Confirm", List.of(""));
+    cancel = new ItemModel("minecraft:red_stained_grass_pane", "{#db2e2e>#e68c8c}Cancel", List.of(""));
     gender = Map.of("N", "§7None", "M", "§6Male", "F", "§dFemale");
-    form = Map.of("Galar", "{#E396}Galar");
-    nature = Map.of("Hardy", "{#E396}Hardy");
-    ability = Map.of("None", "{#E396}None");
-    ball = Map.of("poke_ball", "{#E396}Poke Ball");
+    form = Map.of("Galar", "Galar");
+    nature = Map.of("Hardy", "Hardy");
+    ability = Map.of("None", "None");
+    ball = Map.of("poke_ball", "§c§lPoke §f§lBall");
 
   }
 
@@ -87,6 +89,10 @@ public class Lang {
 
   public String getDescLevel() {
     return descLevel;
+  }
+
+  public String getColorhexnamepoke() {
+    return colorhexnamepoke;
   }
 
   public ItemModel getConfirm() {
@@ -208,6 +214,7 @@ public class Lang {
         info = lang.getInfo();
         confirm = lang.getConfirm();
         cancel = lang.getCancel();
+        colorhexnamepoke = lang.getColorhexnamepoke();
         descLevel = lang.getDescLevel();
         descShiny = lang.getDescShiny();
         descLegendary = lang.getDescLegendary();
