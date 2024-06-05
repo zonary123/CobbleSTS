@@ -45,12 +45,12 @@ public class STSUtil {
         pokemon.getAbility().getDisplayName().split("\\.")[2])));
     lore.add(CobbleSTS.language.getDescBall().replace("%ball%",
       CobbleSTS.language.getBall().getOrDefault(pokemon.getCaughtBall().getName().getPath(),
-        pokemon.getCaughtBall().getName().getPath())));
-    lore.add(CobbleSTS.language.getDescprice().replace("%price%", String.valueOf(Sell(pokemon, false, null, 0))));
+        Utils.parseItemId(pokemon.getCaughtBall().getName().toLanguageKey().replace(".", ":")).getDisplayName().getString().replace("[", "").replace("]", ""))));
+    lore.add(CobbleSTS.language.getDescprice().replace("%price%", String.valueOf(Sell(pokemon, false, null))));
     return lore;
   }
 
-  public static int Sell(Pokemon pokemon, boolean execute, Player player, int index) {
+  public static int Sell(Pokemon pokemon, boolean execute, Player player) {
     int price = CobbleSTS.config.getPokemon().getOrDefault(pokemon.getSpecies().getName(), CobbleSTS.config.getBase());
 
     // Level
@@ -90,12 +90,9 @@ public class STSUtil {
     price += CobbleSTS.config.getBall().getOrDefault(pokemon.getCaughtBall().getName().getPath(),
       CobbleSTS.config.getDefaultball());
 
-    if (CobbleSTS.config.isDebug()) {
-      showInfo(pokemon, price);
-    }
     if (execute) {
       try {
-        command(player, pokemon, price, index);
+        command(player, pokemon, price);
       } catch (NoPokemonStoreException e) {
         e.printStackTrace();
       }
@@ -105,24 +102,6 @@ public class STSUtil {
 
 
     return price;
-  }
-
-  private static void showInfo(Pokemon pokemon, int price) {
-    String info = "Pokemon: " + pokemon.getSpecies().getName() + "\n" +
-      "Level: " + pokemon.getLevel() + "\n" +
-      "Shiny: " + (pokemon.getShiny() ? "Yes" : "No") + "\n" +
-      "Legendary: " + (pokemon.isLegendary() ? "Yes" : "No") + "\n" +
-      "IVs: " + getAverageIVs(pokemon) + "\n" +
-      "EVs: " + getAverageEvs(pokemon) + "\n" +
-      "Happiness: " + pokemon.getFriendship() + "\n" +
-      "Gender: " + pokemon.getGender().getShowdownName() + "\n" +
-      "Form: " + pokemon.getForm().getName() + "\n" +
-      "Nature: " + pokemon.getNature().getDisplayName().split("\\.")[2] + "\n" +
-      "Ability: " + pokemon.getAbility().getDisplayName().split("\\.")[2] + "\n" +
-      "Ball: " + pokemon.getCaughtBall().getName().getPath() + "\n" +
-      "Price: " + price;
-
-    System.out.println(info);
   }
 
   private static int getAverageIVs(Pokemon pokemon) {
@@ -139,11 +118,11 @@ public class STSUtil {
     return evsTotal.get() / 6;
   }
 
-  private static void command(Player player, Pokemon pokemon, int price, int index) throws NoPokemonStoreException {
+  private static void command(Player player, Pokemon pokemon, int price) throws NoPokemonStoreException {
     CommandSourceStack serverSource = CobbleSTS.server.createCommandSourceStack();
     CommandDispatcher<CommandSourceStack> disparador = CobbleSTS.server.getCommands().getDispatcher();
     PlayerPartyStore partyStorageSlot = Cobblemon.INSTANCE.getStorage().getParty(player.getUUID());
-
+    CobbleSTS.manager.addPlayerWithDate(player, CobbleSTS.config.getCooldown());
     try {
       String r = CobbleSTS.config.getEcocommand().replace("%player%", player.getGameProfile().getName()).replace(
         "%amount%", String.valueOf(price));

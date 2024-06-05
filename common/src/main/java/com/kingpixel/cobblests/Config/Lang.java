@@ -35,10 +35,14 @@ public class Lang {
   private String descAbility;
   private String descBall;
   private String descprice;
+  private String messagecooldown;
+  private String readytosell;
   private ItemModel info;
   private ItemModel nopokemon;
   private ItemModel confirm;
   private ItemModel cancel;
+  private ItemModel itemNotAllowShiny;
+  private ItemModel itemNotAllowLegendary;
   private Map<String, String> gender;
   private Map<String, String> form;
   private Map<String, String> nature;
@@ -53,30 +57,43 @@ public class Lang {
     sell = "{#E39651>#f2c49b}Sell %pokemon% for %price%?";
     fill = "minecraft:gray_stained_glass_pane";
     colorhexnamepoke = "{#ff7900>#ffdbba}";
-    descLevel = "§7Level: §e%level%";
-    descShiny = "§7Shiny: §e%shiny%";
-    descLegendary = "§7Legendary: §e%legendary%";
-    descIvs = "§7IVs: §e%ivs%";
-    descEvs = "§7EVs: §e%evs%";
-    descHappiness = "§7Happiness: §e%happiness%";
-    descGender = "§7Gender: §e%gender%";
-    descForm = "§7Form: §e%form%";
-    descNature = "§7Nature: §e%nature%";
-    descAbility = "§7Ability: §e%ability%";
-    descBall = "§7Ball: §e%ball%";
-    descprice = "§7Price: §e%price%";
+    descLevel = "&7Level: &e%level%";
+    descShiny = "&7Shiny: &e%shiny%";
+    descLegendary = "&7Legendary: &e%legendary%";
+    descIvs = "&7IVs: &e%ivs%";
+    descEvs = "&7EVs: &e%evs%";
+    descHappiness = "&7Happiness: &e%happiness%";
+    descGender = "&7Gender: &e%gender%";
+    descForm = "&7Form: &e%form%";
+    descNature = "&7Nature: &e%nature%";
+    descAbility = "&7Ability: &e%ability%";
+    descBall = "&7Ball: &e%ball%";
+    descprice = "&7Price: &e%price%";
     yes = "Yes";
     no = "No";
+    messagecooldown = "&7You must wait &e%day%&6d &e%hour%&6h &e%minut%&6m &e%seconds%&6s &7to sell another pokemon.";
+    readytosell = "&aReady to sell in STS";
+    itemNotAllowShiny = new ItemModel("cobblemon:luxury_ball", "{#db2e2e>#e68c8c}Shiny not allowed", List.of(""));
+    itemNotAllowLegendary = new ItemModel("cobblemon:master_ball", "{#db2e2e>#e68c8c}Legendary not allowed", List.of(
+      ""));
     info = new ItemModel("minecraft:book", "{#ff7900>#ffdbba}Info Price", List.of(""));
     nopokemon = new ItemModel("cobblemon:poke_ball", "{#db2e2e>#e68c8c}Empty slot", List.of(""));
     confirm = new ItemModel("minecraft:lime_stained_grass_pane", "{#3ec758>#a2f2b2}Confirm", List.of(""));
     cancel = new ItemModel("minecraft:red_stained_grass_pane", "{#db2e2e>#e68c8c}Cancel", List.of(""));
-    gender = Map.of("N", "§7None", "M", "§6Male", "F", "§dFemale");
+    gender = Map.of("N", "&7None", "M", "&6Male", "F", "&dFemale");
     form = Map.of("Galar", "Galar");
     nature = Map.of("Hardy", "Hardy");
     ability = Map.of("None", "None");
-    ball = Map.of("poke_ball", "§c§lPoke §f§lBall");
+    ball = Map.of("poke_ball", "&c&lPoke &f&lBall");
 
+  }
+
+  public ItemModel getItemNotAllowShiny() {
+    return itemNotAllowShiny;
+  }
+
+  public ItemModel getItemNotAllowLegendary() {
+    return itemNotAllowLegendary;
   }
 
   public String getYes() {
@@ -199,6 +216,14 @@ public class Lang {
     return descBall;
   }
 
+  public String getMessagecooldown() {
+    return messagecooldown;
+  }
+
+  public String getReadytosell() {
+    return readytosell;
+  }
+
   public void init() {
     CompletableFuture<Boolean> futureRead = Utils.readFileAsync(CobbleSTS.path + "lang/", CobbleSTS.config.getLang() + ".json",
       el -> {
@@ -234,6 +259,10 @@ public class Lang {
         nature = lang.getNature();
         ability = lang.getAbility();
         ball = lang.getBall();
+        itemNotAllowShiny = lang.getItemNotAllowShiny();
+        itemNotAllowLegendary = lang.getItemNotAllowLegendary();
+        readytosell = lang.getReadytosell();
+        messagecooldown = lang.getMessagecooldown();
         String data = gson.toJson(this);
         CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleSTS.path + "lang/", CobbleSTS.config.getLang() + ".json",
           data);

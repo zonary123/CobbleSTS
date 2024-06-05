@@ -19,7 +19,7 @@ import java.util.Objects;
  * @author Carlos Varas Alonso - 26/05/2024 16:17
  */
 public class STSConfirm {
-  public static GooeyPage open(Pokemon pokemon, int index) {
+  public static GooeyPage open(Pokemon pokemon) {
     GooeyButton fill = GooeyButton.builder()
       .display(Utils.parseItemId(CobbleSTS.language.getFill()))
       .title("")
@@ -29,7 +29,7 @@ public class STSConfirm {
       .title(TextUtil.parseHexCodes(CobbleSTS.language.getConfirm().getTitle()))
       .lore(Component.class, TextUtil.parseHexCodes(CobbleSTS.language.getConfirm().getLore()))
       .onClick(action -> {
-        STSUtil.Sell(pokemon, true, action.getPlayer(), index);
+        STSUtil.Sell(pokemon, true, action.getPlayer());
         try {
           UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STS.open(action.getPlayer())));
         } catch (NoPokemonStoreException e) {
@@ -48,6 +48,13 @@ public class STSConfirm {
       .display(Utils.parseItemId(CobbleSTS.language.getCancel().getId()))
       .title(TextUtil.parseHexCodes(CobbleSTS.language.getCancel().getTitle()))
       .lore(Component.class, TextUtil.parseHexCodes(CobbleSTS.language.getCancel().getLore()))
+      .onClick(action -> {
+        try {
+          UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STS.open(action.getPlayer())));
+        } catch (NoPokemonStoreException e) {
+          throw new RuntimeException(e);
+        }
+      })
       .build();
 
 

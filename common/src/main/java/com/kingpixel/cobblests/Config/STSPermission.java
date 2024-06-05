@@ -1,4 +1,4 @@
-package com.kingpixel.cobblests.permissions;
+package com.kingpixel.cobblests.Config;
 
 import com.cobblemon.mod.common.Cobblemon;
 import com.cobblemon.mod.common.api.permission.CobblemonPermission;
@@ -12,14 +12,17 @@ import net.minecraft.commands.CommandSourceStack;
 public class STSPermission {
 
   public final CobblemonPermission STS_BASE_PERMISSION;
+  public final CobblemonPermission STS_OTHER_PERMISSION;
   public final CobblemonPermission STS_RELOAD_PERMISSION;
 
   public STSPermission() {
     this.STS_BASE_PERMISSION = new CobblemonPermission("cobblests.command.cobblests.base",
-      toPermLevel(CobbleSTS.dexpermission.permissionLevels.COMMAND_COBBLESTS_PERMISSION_LEVEL));
+      toPermLevel(CobbleSTS.stspermission.permissionLevels.COMMAND_COBBLESTS_PERMISSION_LEVEL));
     // Admin
+    this.STS_OTHER_PERMISSION = new CobblemonPermission("cobblests.command.cobblests.other",
+      toPermLevel(CobbleSTS.stspermission.permissionLevels.COMMAND_COBBLESTS_OTHER_PERMISSION_LEVEL));
     this.STS_RELOAD_PERMISSION = new CobblemonPermission("cobblests.command.cobblests.reload",
-      PermissionLevel.CHEAT_COMMANDS_AND_COMMAND_BLOCKS);
+      toPermLevel(CobbleSTS.stspermission.permissionLevels.COMMAND_COBBLESTS_RELOAD_PERMISSION_LEVEL));
   }
 
   public PermissionLevel toPermLevel(int permLevel) {

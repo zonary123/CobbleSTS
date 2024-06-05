@@ -1,7 +1,7 @@
 package com.kingpixel.cobblests.command;
 
 import com.kingpixel.cobblests.CobbleSTS;
-import com.kingpixel.cobblests.permissions.STSPermission;
+import com.kingpixel.cobblests.Config.STSPermission;
 import com.kingpixel.cobblests.utils.TextUtil;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;

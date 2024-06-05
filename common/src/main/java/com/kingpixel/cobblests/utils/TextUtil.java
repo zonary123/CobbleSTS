@@ -73,7 +73,6 @@ public class TextUtil {
     if (textList == null) return null;
 
     List<Component> result = new ArrayList<>();
-    int size = textList.size();
 
     for (String text : textList) {
       text = text.replace("&", "§"); // Replace & with §

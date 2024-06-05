@@ -2,24 +2,31 @@
   "schemaVersion": 1,
   "id": "cobblests",
   "version": "${version}",
-  "name": "CobbleSTS",
-  "description": "",
+  "name": "Cobble STS",
+  "description": "This is an example description! Tell everyone what your mod is about!",
   "authors": [
-    "zonary123"
+    "Zonary123"
   ],
   "contact": {
-    "github": "https://github.com/zonary123/Cobblehunt"
+    "github": "https://github.com/Zonary123"
   },
   "license": "MIT",
-  "icon": "icon.png",
+  "icon": "assets/cobblests/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.kingpixel.fabric.cobblests.FabricModExample"
+      "com.kingpixel.fabric.cobblests.CobbleSTSFabric"
     ]
   },
   "depends": {
-    "fabricloader": ">=0.14.22",
-    "minecraft": ">=1.20.1"
+    "fabricloader": ">=0.15.11",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "architectury": ">=9.2.14",
+    "cobblemon": ">=1.5.0",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "another-mod": "*"
   }
 }
