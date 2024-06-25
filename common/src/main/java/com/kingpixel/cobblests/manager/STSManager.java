@@ -52,7 +52,7 @@ public class STSManager {
 
 
   public void addPlayer(Entity player) {
-    userInfo.put(player.getUUID(), new UserInfo(new Date()));
+    userInfo.putIfAbsent(player.getUUID(), new UserInfo(new Date()));
   }
 
   public void init() {

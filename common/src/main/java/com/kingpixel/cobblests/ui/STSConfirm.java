@@ -8,8 +8,8 @@ import com.cobblemon.mod.common.api.storage.NoPokemonStoreException;
 import com.cobblemon.mod.common.item.PokemonItem;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
+import com.kingpixel.cobblests.utils.AdventureTranslator;
 import com.kingpixel.cobblests.utils.STSUtil;
-import com.kingpixel.cobblests.utils.TextUtil;
 import com.kingpixel.cobblests.utils.Utils;
 import net.minecraft.network.chat.Component;
 
@@ -26,8 +26,8 @@ public class STSConfirm {
       .build();
     GooeyButton confirm = GooeyButton.builder()
       .display(Utils.parseItemId(CobbleSTS.language.getConfirm().getId()))
-      .title(TextUtil.parseHexCodes(CobbleSTS.language.getConfirm().getTitle()))
-      .lore(Component.class, TextUtil.parseHexCodes(CobbleSTS.language.getConfirm().getLore()))
+      .title(AdventureTranslator.toNative(CobbleSTS.language.getConfirm().getTitle()))
+      .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getConfirm().getLore()))
       .onClick(action -> {
         STSUtil.Sell(pokemon, true, action.getPlayer());
         try {
@@ -40,14 +40,14 @@ public class STSConfirm {
 
     GooeyButton pokebutton = GooeyButton.builder()
       .display(PokemonItem.from(pokemon))
-      .title(TextUtil.parseHexCodes(pokemon.getSpecies().getName()))
-      .lore(Component.class, TextUtil.parseHexCodes(STSUtil.formatPokemonLore(pokemon)))
+      .title(AdventureTranslator.toNative(CobbleSTS.language.getColorhexnamepoke() + pokemon.getSpecies().getName()))
+      .lore(Component.class, AdventureTranslator.toNativeL(STSUtil.formatPokemonLore(pokemon)))
       .build();
 
     GooeyButton cancel = GooeyButton.builder()
       .display(Utils.parseItemId(CobbleSTS.language.getCancel().getId()))
-      .title(TextUtil.parseHexCodes(CobbleSTS.language.getCancel().getTitle()))
-      .lore(Component.class, TextUtil.parseHexCodes(CobbleSTS.language.getCancel().getLore()))
+      .title(AdventureTranslator.toNative(CobbleSTS.language.getCancel().getTitle()))
+      .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getCancel().getLore()))
       .onClick(action -> {
         try {
           UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STS.open(action.getPlayer())));
@@ -65,8 +65,6 @@ public class STSConfirm {
       .set(1, 6, cancel)
       .build();
 
-    GooeyPage page =
-      GooeyPage.builder().title(TextUtil.parseHexCodes(CobbleSTS.language.getTitleconfirm())).template(template).build();
-    return page;
+    return GooeyPage.builder().title(AdventureTranslator.toNative(CobbleSTS.language.getTitleconfirm())).template(template).build();
   }
 }

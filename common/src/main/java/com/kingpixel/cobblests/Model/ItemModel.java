@@ -1,11 +1,15 @@
 package com.kingpixel.cobblests.Model;
 
+import lombok.Getter;
+
 import java.util.List;
 
 /**
  * @author Carlos Varas Alonso - 26/05/2024 4:15
  */
+@Getter
 public class ItemModel {
+  private Integer slot;
   private String id;
   private String title;
   private List<String> lore;
@@ -16,27 +20,10 @@ public class ItemModel {
     this.lore = lore;
   }
 
-  public String getId() {
-    return id;
-  }
-
-  public void setId(String id) {
+  public ItemModel(Integer slot, String id, String title, List<String> lore) {
+    this.slot = slot;
     this.id = id;
-  }
-
-  public String getTitle() {
-    return title;
-  }
-
-  public void setTitle(String title) {
     this.title = title;
-  }
-
-  public List<String> getLore() {
-    return lore;
-  }
-
-  public void setLore(List<String> lore) {
     this.lore = lore;
   }
 }

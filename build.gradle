@@ -14,6 +14,21 @@ allprojects {
     version = rootProject.mod_version
 }
 
+// Custom task to generate changelog at root project level
+task generateChangelog {
+    doLast {
+        def version = project.version
+        def changelogFile = file("$rootDir/CHANGELOG.md")
+        def changelogContent = changelogFile.exists() ? changelogFile.text : "No changelog available."
+        def changelogDir = file("$rootDir/changelog")
+        changelogDir.mkdirs()
+        def changelogOutputFile = file("$changelogDir/CHANGELOG-${version}.md")
+        changelogOutputFile.text = changelogContent
+        changelogFile.write("# Changelog\n\n## [${version}]\n\n${changelogContent}", true)
+    }
+}
+
+// Ensure the generateChangelog task runs before the build task in all subprojects
 subprojects {
     apply plugin: "java"
     apply plugin: 'dev.architectury.loom'
@@ -28,22 +43,21 @@ subprojects {
 
     repositories {
         // Add repositories to retrieve artifacts from in here.
-        // You should only use this when depending on other mods because
-        // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-        // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-        // for more information about repositories.
         mavenCentral()
-
+        maven {
+            name = "sonatype-oss-snapshots1"
+            url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+        }
         maven {
             url "https://maven.impactdev.net/repository/development/"
         }
-
         maven {
             url = uri("https://cursemaven.com")
             content {
                 includeGroup("curse.maven")
             }
         }
+        mavenCentral()
     }
 
     dependencies {
@@ -52,9 +66,6 @@ subprojects {
     }
 
     java {
-        // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-        // if it is present.
-        // If you remove this line, sources will not be generated.
         withSourcesJar()
 
         sourceCompatibility = JavaVersion.VERSION_17
@@ -65,21 +76,26 @@ subprojects {
         it.options.release = 17
     }
 
+    // Ensure generateChangelog runs before build
+    tasks.named("build") {
+        dependsOn(rootProject.tasks.generateChangelog)
+    }
+
     // Configure Maven publishing.
     publishing {
         publications {
             mavenJava(MavenPublication) {
                 artifactId = base.archivesName.get()
                 from components.java
+                // Attach the generated changelog as an artifact
+                artifact("${rootProject.buildDir}/changelog/CHANGELOG-${rootProject.version}.md") {
+                    classifier "changelog"
+                }
             }
         }
 
-        // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
         repositories {
             // Add repositories to publish to here.
-            // Notice: This block does NOT have the same function as the block in the top level.
-            // The repositories here will be used for publishing your artifact, not for
-            // retrieving dependencies.
         }
     }
 }

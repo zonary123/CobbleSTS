@@ -1,11 +1,14 @@
 package com.kingpixel.cobblests.utils;
 
+import com.cobblemon.mod.common.api.pokemon.PokemonProperties;
+import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kingpixel.cobblests.CobbleSTS;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.io.File;
@@ -20,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -31,6 +35,12 @@ import java.util.function.Consumer;
  * Abstract class that contains some utility methods.
  */
 public abstract class Utils {
+  public static final Random RANDOM = new Random();
+
+  public static Path getFilePath(String filePath) {
+    return Paths.get(new File("").getAbsolutePath() + filePath);
+  }
+
   /**
    * Method to write some data to file.
    *
@@ -191,18 +201,75 @@ public abstract class Utils {
     return new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
   }
 
-  public static void broadcastMessage(String message) {
-    MinecraftServer server = CobbleSTS.server;
-    ArrayList<ServerPlayer> players = new ArrayList<>(server.getPlayerList().getPlayers());
-    for (ServerPlayer pl : players) {
-      pl.sendSystemMessage(TextUtil.parseHexCodes(message));
+
+  public static Gson newWithoutSpacingGson() {
+    return new GsonBuilder().disableHtmlEscaping().create();
+  }
+
+  /**
+   * Formats a message by removing minecraft formatting codes if sending to console.
+   *
+   * @param message  The message to format.
+   * @param isPlayer If the sender is a player or console.
+   *
+   * @return String that is the formatted message.
+   */
+  public static String formatMessage(String message, Boolean isPlayer) {
+    if (isPlayer) {
+      return message.trim();
+    } else {
+      return message.replaceAll("§[0-9a-fk-or]", "").trim();
     }
   }
+
 
   public static ItemStack parseItemId(String id) {
     CompoundTag tag = new CompoundTag();
     tag.putString("id", id);
     tag.putInt("Count", 1);
     return ItemStack.of(tag);
+  }
+
+  public static ItemStack parseItemId(String id, int amount) {
+    CompoundTag tag = new CompoundTag();
+    tag.putString("id", id);
+    tag.putInt("Count", amount);
+    return ItemStack.of(tag);
+  }
+
+  public static void broadcastMessage(String message) {
+    MinecraftServer server = CobbleSTS.server;
+    ArrayList<ServerPlayer> players = new ArrayList<>(server.getPlayerList().getPlayers());
+    for (ServerPlayer pl : players) {
+      pl.sendSystemMessage(AdventureTranslator.toNative(message));
+    }
+  }
+
+  public static Pokemon createPokemonParse(String pokmeon) {
+    return PokemonProperties.Companion.parse(pokmeon).create();
+  }
+
+
+  public static String sanitizeDescriptionId(ItemStack itemStack) {
+    Item item = itemStack.getItem();
+    return item.getDescriptionId(itemStack).replace("item.", "").replace("block.", "").replace(".", ":");
+  }
+
+  public static void removeFiles(String directoryPath) {
+    File directory = new File(Paths.get(new File("").getAbsolutePath()) + directoryPath);
+    if (directory.exists() && directory.isDirectory()) {
+      File[] files = directory.listFiles();
+      if (files != null) {
+        for (File file : files) {
+          if (file.isFile()) {
+            file.delete();
+          } else if (file.isDirectory()) {
+            removeFiles(file.getAbsolutePath());
+          }
+        }
+      }
+    } else {
+      CobbleSTS.LOGGER.info("Directory " + directoryPath + " does not exist or is not a directory.");
+    }
   }
 }

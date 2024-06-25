@@ -6,6 +6,7 @@ import com.cobblemon.mod.common.api.storage.party.PlayerPartyStore;
 import com.cobblemon.mod.common.pokemon.EVs;
 import com.cobblemon.mod.common.pokemon.IVs;
 import com.cobblemon.mod.common.pokemon.Pokemon;
+import com.cobblemon.mod.common.util.LocalizationUtilsKt;
 import com.kingpixel.cobblests.CobbleSTS;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
@@ -39,10 +40,10 @@ public class STSUtil {
         pokemon.getForm().getName())));
     lore.add(CobbleSTS.language.getDescNature().replace("%nature%",
       CobbleSTS.language.getNature().getOrDefault(pokemon.getNature().getDisplayName().split("\\.")[2],
-        pokemon.getNature().getDisplayName().split("\\.")[2])));
+        LocalizationUtilsKt.lang(pokemon.getNature().getDisplayName().replace("cobblemon.", "")).getString())));
     lore.add(CobbleSTS.language.getDescAbility().replace("%ability%",
       CobbleSTS.language.getAbility().getOrDefault(pokemon.getAbility().getDisplayName().split("\\.")[2],
-        pokemon.getAbility().getDisplayName().split("\\.")[2])));
+        LocalizationUtilsKt.lang(pokemon.getAbility().getDisplayName().replace("cobblemon.", "")).getString())));
     lore.add(CobbleSTS.language.getDescBall().replace("%ball%",
       CobbleSTS.language.getBall().getOrDefault(pokemon.getCaughtBall().getName().getPath(),
         Utils.parseItemId(pokemon.getCaughtBall().getName().toLanguageKey().replace(".", ":")).getDisplayName().getString().replace("[", "").replace("]", ""))));
@@ -78,7 +79,7 @@ public class STSUtil {
     // Form
     price += CobbleSTS.config.getForm().getOrDefault(pokemon.getForm().getName(), CobbleSTS.config.getDefaultform());
 
-    // Nature
+    // STSNature
     price += CobbleSTS.config.getNature().getOrDefault(pokemon.getNature().getDisplayName().split("\\.")[2],
       CobbleSTS.config.getDefaultnature());
 
@@ -125,15 +126,17 @@ public class STSUtil {
     CobbleSTS.manager.addPlayerWithDate(player, CobbleSTS.config.getCooldown());
     try {
       String r = CobbleSTS.config.getEcocommand().replace("%player%", player.getGameProfile().getName()).replace(
-        "%amount%", String.valueOf(price));
+        "%amount%", String.valueOf(price)).replace("%price%", String.valueOf(price));
       ParseResults<CommandSourceStack> parseResults = disparador.parse(r, serverSource);
       disparador.execute(parseResults);
-      partyStorageSlot.remove(pokemon);
-      player.sendSystemMessage(TextUtil.parseHexCodes(CobbleSTS.language.getSell().replace("%player%",
+      if (!partyStorageSlot.remove(pokemon)) {
+        Cobblemon.INSTANCE.getStorage().getPC(player.getUUID()).remove(pokemon);
+      }
+      player.sendSystemMessage(AdventureTranslator.toNative(CobbleSTS.language.getSell().replace("%player%",
         player.getGameProfile().getName()).replace("%pokemon%", pokemon.getSpecies().getName()).replace("%price%",
         String.valueOf(price))));
     } catch (CommandSyntaxException e) {
-      player.sendSystemMessage(TextUtil.parseHexCodes("Error al dar el dinero"));
+      player.sendSystemMessage(AdventureTranslator.toNative("Error to give money"));
       e.printStackTrace();
     }
   }

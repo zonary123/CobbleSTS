@@ -2,6 +2,7 @@ package com.kingpixel.cobblests.ui;
 
 import ca.landonjw.gooeylibs2.api.UIManager;
 import ca.landonjw.gooeylibs2.api.button.GooeyButton;
+import ca.landonjw.gooeylibs2.api.button.RateLimitedButton;
 import ca.landonjw.gooeylibs2.api.page.GooeyPage;
 import ca.landonjw.gooeylibs2.api.template.types.ChestTemplate;
 import com.cobblemon.mod.common.Cobblemon;
@@ -10,13 +11,15 @@ import com.cobblemon.mod.common.api.storage.party.PlayerPartyStore;
 import com.cobblemon.mod.common.item.PokemonItem;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
+import com.kingpixel.cobblests.ui.Info.STSInfo;
+import com.kingpixel.cobblests.utils.AdventureTranslator;
 import com.kingpixel.cobblests.utils.STSUtil;
-import com.kingpixel.cobblests.utils.TextUtil;
 import com.kingpixel.cobblests.utils.Utils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Carlos Varas Alonso - 26/05/2024 4:04
@@ -32,19 +35,36 @@ public class STS {
         .title("")
         .build();
 
-      GooeyButton poke1 = createButtonPokemon(partyStore.get(0));
-      GooeyButton poke2 = createButtonPokemon(partyStore.get(1));
-      GooeyButton poke3 = createButtonPokemon(partyStore.get(2));
+      RateLimitedButton poke1 = createButtonPokemon(partyStore.get(0));
+      RateLimitedButton poke2 = createButtonPokemon(partyStore.get(1));
+      RateLimitedButton poke3 = createButtonPokemon(partyStore.get(2));
 
       GooeyButton info = GooeyButton.builder()
         .display(Utils.parseItemId(CobbleSTS.language.getInfo().getId()))
-        .title(TextUtil.parseHexCodes(CobbleSTS.language.getInfo().getTitle()))
-        .lore(Component.class, TextUtil.parseHexCodes(CobbleSTS.language.getInfo().getLore()))
+        .title(AdventureTranslator.toNative(CobbleSTS.language.getInfo().getTitle()))
+        .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getInfo().getLore()))
+        .onClick((action) -> {
+          if (CobbleSTS.config.isHiperinfo())
+            UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSInfo.open()));
+        })
         .build();
 
-      GooeyButton poke4 = createButtonPokemon(partyStore.get(3));
-      GooeyButton poke5 = createButtonPokemon(partyStore.get(4));
-      GooeyButton poke6 = createButtonPokemon(partyStore.get(5));
+      GooeyButton pc = GooeyButton.builder()
+        .display(Utils.parseItemId(CobbleSTS.language.getPc().getId()))
+        .title(AdventureTranslator.toNative(CobbleSTS.language.getPc().getTitle()))
+        .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getPc().getLore()))
+        .onClick((action) -> {
+          try {
+            UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSPc.open(player)));
+          } catch (NoPokemonStoreException e) {
+            throw new RuntimeException(e);
+          }
+        })
+        .build();
+
+      RateLimitedButton poke4 = createButtonPokemon(partyStore.get(3));
+      RateLimitedButton poke5 = createButtonPokemon(partyStore.get(4));
+      RateLimitedButton poke6 = createButtonPokemon(partyStore.get(5));
 
 
       ChestTemplate template = ChestTemplate.builder(3)
@@ -52,12 +72,13 @@ public class STS {
         .set(1, 1, poke1)
         .set(1, 2, poke2)
         .set(1, 3, poke3)
+        .set(0, 4, pc)
         .set(1, 4, info)
         .set(1, 5, poke4)
         .set(1, 6, poke5)
         .set(1, 7, poke6)
         .build();
-      GooeyPage page = GooeyPage.builder().template(template).title(TextUtil.parseHexCodes(CobbleSTS.language.getTitle())).build();
+      GooeyPage page = GooeyPage.builder().template(template).title(AdventureTranslator.toNative(CobbleSTS.language.getTitle())).build();
       page.update();
       return page;
     } catch (NoPokemonStoreException e) {
@@ -66,51 +87,51 @@ public class STS {
     return null;
   }
 
-  private static GooeyButton createButtonPokemon(Pokemon pokemon) {
+  public static RateLimitedButton createButtonPokemon(Pokemon pokemon) {
+    GooeyButton button;
     try {
       if (pokemon == null) {
-        return GooeyButton.builder()
+        button = GooeyButton.builder()
           .display(Utils.parseItemId(CobbleSTS.language.getNopokemon().getId()))
-          .title(TextUtil.parseHexCodes(CobbleSTS.language.getNopokemon().getTitle()))
-          .lore(Component.class, TextUtil.parseHexCodes(CobbleSTS.language.getNopokemon().getLore()))
+          .title(AdventureTranslator.toNative(CobbleSTS.language.getNopokemon().getTitle()))
+          .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getNopokemon().getLore()))
           .build();
-      }
-      if (pokemon.getShiny() && !CobbleSTS.config.isAllowshiny()) {
-        return GooeyButton.builder()
+      } else if (pokemon.getShiny() && !CobbleSTS.config.isAllowshiny()) {
+        button = GooeyButton.builder()
           .display(Utils.parseItemId(CobbleSTS.language.getItemNotAllowShiny().getId()))
-          .title(TextUtil.parseHexCodes(CobbleSTS.language.getItemNotAllowShiny().getTitle()))
-          .lore(Component.class, TextUtil.parseHexCodes(CobbleSTS.language.getItemNotAllowShiny().getLore()))
+          .title(AdventureTranslator.toNative(CobbleSTS.language.getItemNotAllowShiny().getTitle()))
+          .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getItemNotAllowShiny().getLore()))
           .build();
-      }
-      if ((pokemon.isLegendary() || CobbleSTS.config.getIslegends().contains(pokemon.getSpecies().getName())) && !CobbleSTS.config.isAllowlegendary()) {
-        return GooeyButton.builder()
+      } else if ((pokemon.isLegendary() || CobbleSTS.config.getIslegends().contains(pokemon.getSpecies().getName())) && !CobbleSTS.config.isAllowlegendary()) {
+        button = GooeyButton.builder()
           .display(Utils.parseItemId(CobbleSTS.language.getItemNotAllowLegendary().getId()))
-          .title(TextUtil.parseHexCodes(CobbleSTS.language.getItemNotAllowLegendary().getTitle()))
-          .lore(Component.class, TextUtil.parseHexCodes(CobbleSTS.language.getItemNotAllowLegendary().getLore()))
+          .title(AdventureTranslator.toNative(CobbleSTS.language.getItemNotAllowLegendary().getTitle()))
+          .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getItemNotAllowLegendary().getLore()))
           .build();
-      }
-      return GooeyButton.builder()
-        .display(PokemonItem.from(pokemon))
-        .title(TextUtil.parseHexCodes(CobbleSTS.language.getColorhexnamepoke() + pokemon.getSpecies().getName()))
-        .lore(Component.class, TextUtil.parseHexCodes(STSUtil.formatPokemonLore(pokemon)))
-        .onClick((action) -> {
-          if (CobbleSTS.config.isHavecooldown()) {
-            if (CobbleSTS.manager.hasCooldownEnded(action.getPlayer())) {
+      } else {
+        button = GooeyButton.builder()
+          .display(PokemonItem.from(pokemon))
+          .title(AdventureTranslator.toNative(CobbleSTS.language.getColorhexnamepoke() + pokemon.getSpecies().getName()))
+          .lore(Component.class, AdventureTranslator.toNativeL(STSUtil.formatPokemonLore(pokemon)))
+          .onClick((action) -> {
+            if (CobbleSTS.config.isHavecooldown()) {
+              if (CobbleSTS.manager.hasCooldownEnded(action.getPlayer())) {
+                UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSConfirm.open(
+                  pokemon)));
+              } else {
+                action.getPlayer().sendSystemMessage(AdventureTranslator.toNative(CobbleSTS.manager.formatTime(action.getPlayer())));
+              }
+            } else {
               UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSConfirm.open(
                 pokemon)));
-            } else {
-              action.getPlayer().sendSystemMessage(TextUtil.parseHexCodes(CobbleSTS.manager.formatTime(action.getPlayer())));
             }
-          } else {
-            UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSConfirm.open(
-              pokemon)));
-          }
-        })
-        .build();
-
+          })
+          .build();
+      }
     } catch (Exception e) {
       e.printStackTrace();
       return null;
     }
+    return RateLimitedButton.builder().button(button).limit(1).interval(3, TimeUnit.SECONDS).build();
   }
 }

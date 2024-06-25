@@ -6,7 +6,7 @@ import com.kingpixel.cobblests.Config.STSConfig;
 import com.kingpixel.cobblests.Config.STSPermission;
 import com.kingpixel.cobblests.command.CommandTree;
 import com.kingpixel.cobblests.manager.STSManager;
-import com.kingpixel.cobblests.utils.TextUtil;
+import com.kingpixel.cobblests.utils.AdventureTranslator;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
@@ -74,7 +74,7 @@ public class CobbleSTS {
         server.getPlayerList().getPlayers().forEach(player -> {
           if (manager.hasCooldownEnded(player) && !manager.getUserInfo().get(player.getUUID()).isMessagesend()) {
             manager.getUserInfo().get(player.getUUID()).setMessagesend(true);
-            player.sendSystemMessage(TextUtil.parseHexCodes(language.getReadytosell()));
+            player.sendSystemMessage(AdventureTranslator.toNative(language.getReadytosell()));
           }
         });
       }

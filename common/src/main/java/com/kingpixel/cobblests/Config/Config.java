@@ -3,6 +3,7 @@ package com.kingpixel.cobblests.Config;
 import com.google.gson.Gson;
 import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobblests.utils.Utils;
+import lombok.Getter;
 
 import java.util.List;
 import java.util.Map;
@@ -12,12 +13,15 @@ import java.util.concurrent.CompletableFuture;
 /**
  * @author Carlos Varas Alonso - 29/04/2024 0:14
  */
+@Getter
 public class Config {
   private String lang;
   private String ecocommand;
   private boolean allowshiny;
   private boolean allowlegendary;
   private boolean havecooldown;
+  private boolean hiperinfo;
+  private int guiinforows;
   private int cooldown;
   private int base;
   private int level;
@@ -42,11 +46,13 @@ public class Config {
 
   public Config() {
     lang = "en";
-    ecocommand = "eco give %player% %price%";
+    ecocommand = "eco deposit %amount% dollars %player%";
+    guiinforows = 6;
     havecooldown = true;
-    cooldown = 30;
     allowshiny = true;
     allowlegendary = true;
+    hiperinfo = true;
+    cooldown = 30;
     base = 500;
     level = 250;
     shiny = 1000;
@@ -69,109 +75,6 @@ public class Config {
     pokemon = Map.of("Magikarp", 100);
   }
 
-  public List<String> getIslegends() {
-    return islegends;
-  }
-
-  public String getEcocommand() {
-    return ecocommand;
-  }
-
-  public String getLang() {
-    return lang;
-  }
-
-  public int getBase() {
-    return base;
-  }
-
-  public int getLevel() {
-    return level;
-  }
-
-  public int getShiny() {
-    return shiny;
-  }
-
-  public int getLegendary() {
-    return legendary;
-  }
-
-  public int getIvs() {
-    return ivs;
-  }
-
-  public int getEvs() {
-    return evs;
-  }
-
-  public int getHappiness() {
-    return happiness;
-  }
-
-  public int getDefaultgender() {
-    return defaultgender;
-  }
-
-  public int getDefaultform() {
-    return defaultform;
-  }
-
-  public int getDefaultnature() {
-    return defaultnature;
-  }
-
-  public int getDefaultability() {
-    return defaultability;
-  }
-
-  public int getDefaultball() {
-    return defaultball;
-  }
-
-  public Map<String, Integer> getGender() {
-    return gender;
-  }
-
-  public Map<String, Integer> getForm() {
-    return form;
-  }
-
-  public Map<String, Integer> getNature() {
-    return nature;
-  }
-
-  public Map<String, Integer> getAbility() {
-    return ability;
-  }
-
-  public Map<String, Integer> getBall() {
-    return ball;
-  }
-
-  public Map<String, Integer> getPokemon() {
-    return pokemon;
-  }
-
-  public boolean isHavecooldown() {
-    return havecooldown;
-  }
-
-  public int getCooldown() {
-    return cooldown;
-  }
-
-  public boolean isAllowshiny() {
-    return allowshiny;
-  }
-
-  public boolean isAllowlegendary() {
-    return allowlegendary;
-  }
-
-  public Map<String, Integer> getLegends() {
-    return legends;
-  }
 
   public void init() {
     CompletableFuture<Boolean> futureRead = Utils.readFileAsync(CobbleSTS.path, "config.json",
@@ -180,6 +83,7 @@ public class Config {
         Config config = gson.fromJson(el, Config.class);
         islegends = config.getIslegends();
         lang = config.getLang();
+        guiinforows = config.getGuiinforows();
         havecooldown = config.isHavecooldown();
         cooldown = config.getCooldown();
         ecocommand = config.getEcocommand();
