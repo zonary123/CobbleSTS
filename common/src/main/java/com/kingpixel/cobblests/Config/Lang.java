@@ -2,10 +2,12 @@ package com.kingpixel.cobblests.Config;
 
 import com.google.gson.Gson;
 import com.kingpixel.cobblests.CobbleSTS;
-import com.kingpixel.cobblests.Model.ItemModel;
-import com.kingpixel.cobblests.utils.Utils;
+import com.kingpixel.cobbleutils.CobbleUtils;
+import com.kingpixel.cobbleutils.Model.ItemModel;
+import com.kingpixel.cobbleutils.util.Utils;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -30,33 +32,22 @@ public class Lang {
   private String titleLegends;
   private String sell;
   private String fill;
-  private String yes;
-  private String no;
   private String colorhexnamepoke;
   private String colorhexItem;
   private String colorPrice;
   private String colorSeparator;
   private String separator;
-  private String descLevel;
-  private String descShiny;
-  private String descLegendary;
-  private String descIvs;
-  private String descEvs;
-  private String descHappiness;
-  private String descGender;
-  private String descForm;
-  private String descNature;
-  private String descAbility;
-  private String descBall;
   private String descprice;
   private String messagecooldown;
   private String readytosell;
+  private List<String> pokemonLore;
   private ItemModel info;
   private ItemModel nopokemon;
   private ItemModel confirm;
   private ItemModel cancel;
   private ItemModel itemNotAllowShiny;
   private ItemModel itemNotAllowLegendary;
+  private ItemModel itemBlacklisted;
   private ItemModel itempreviouspage;
   private ItemModel itemclose;
   private ItemModel itemnextpage;
@@ -96,20 +87,9 @@ public class Lang {
     colorhexItem = "<gradient:#27b3cf:#88d4e3>";
     colorPrice = "<gradient:#27b3cf:#88d4e3>";
     colorSeparator = "<gradient:#27b3cf:#88d4e3>";
-    descLevel = "&7Level: &e%level%";
-    descShiny = "&7Shiny: &e%shiny%";
-    descLegendary = "&7Legendary: &e%legendary%";
-    descIvs = "&7IVs: &e%ivs%";
-    descEvs = "&7EVs: &e%evs%";
-    descHappiness = "&7Happiness: &e%happiness%";
-    descGender = "&7Gender: &e%gender%";
-    descForm = "&7Form: &e%form%";
-    descNature = "&7Nature: &e%nature%";
-    descAbility = "&7Ability: &e%ability%";
-    descBall = "&7Ball: &e%ball%";
-    descprice = "&7Price: &e%price%";
-    yes = "Yes";
-    no = "No";
+    pokemonLore = new ArrayList<>(CobbleUtils.language.getLorepokemon());
+    pokemonLore.add("Price: %price%");
+    itemBlacklisted = new ItemModel("cobblemon:master_ball", "<gradient:#db2e2e:#e68c8c>Blacklisted", List.of(""));
     messagecooldown = "&7You must wait &e%day%&6d &e%hour%&6h &e%minut%&6m &e%seconds%&6s &7to sell another pokemon.";
     readytosell = "&aReady to sell in STS";
     itemNotAllowShiny = new ItemModel("cobblemon:luxury_ball", "<gradient:#db2e2e:#e68c8c>Shiny not allowed", List.of(""));
@@ -117,8 +97,8 @@ public class Lang {
       ""));
     info = new ItemModel("minecraft:book", "<gradient:#27b3cf:#88d4e3>Info Price", List.of(""));
     nopokemon = new ItemModel("cobblemon:poke_ball", "<gradient:#db2e2e:#e68c8c>Empty slot", List.of(""));
-    confirm = new ItemModel("minecraft:lime_stained_glass_pane", "<gradient:#3ec758:#a2f2b2>Confirm", List.of(""));
-    cancel = new ItemModel("minecraft:red_stained_glass_pane", "<gradient:#db2e2e:#e68c8c>Cancel", List.of(""));
+    confirm = CobbleUtils.language.getItemConfirm();
+    cancel = CobbleUtils.language.getItemCancel();
     gender = Map.of("N", "&7None", "M", "&bMale", "F", "&dFemale");
     form = Map.of("Galar", "Galar");
     nature = Map.of("Hardy", "Hardy");
@@ -133,29 +113,29 @@ public class Lang {
     ItemGender = new ItemModel(10, "minecraft:light_blue_wool", "&bGender", List.of("&7Price default: %base%",
       "&7Click to open " +
         "for more " +
-        "information"));
+        "information"), 0);
     ItemForm = new ItemModel(12, "minecraft:book", "&bForm", List.of("&7Price default: %base%", "&7Click to open for " +
       "more " +
-      "information"));
+      "information"), 0);
     ItemNature = new ItemModel(14, "cobblemon:everstone", "&bNature", List.of("&7Price default: %base%", "&7Click to " +
       "open " +
       "for more " +
-      "information"));
+      "information"), 0);
     ItemAbility = new ItemModel(16, "cobblemon:ability_capsule", "&bAbility", List.of("&7Price default: %base%",
       "&7Click to open" +
         " " +
         "for more " +
-        "information"));
+        "information"), 0);
     ItemBall = new ItemModel(29, "cobblemon:poke_ball", "&bBall", List.of("&7Price default: %base%", "&7Click to open" +
       " for " +
       "more " +
-      "information"));
+      "information"), 0);
     ItemPokemon = new ItemModel(31, "pokemon:squirtle", "&bPokemon", List.of("&7Not have price default", "&7Click to " +
       "open for more " +
-      "information"));
+      "information"), 0);
     ItemLegends = new ItemModel(33, "pokemon:squirtle", "&bLegends", List.of("&7Not have price default", "&7Click to " +
       "open for more " +
-      "information"));
+      "information"), 0);
   }
 
   public void init() {
@@ -168,23 +148,10 @@ public class Lang {
         title = lang.getTitle();
         sell = lang.getSell();
         fill = lang.getFill();
-        yes = lang.getYes();
-        no = lang.getNo();
         info = lang.getInfo();
         confirm = lang.getConfirm();
         cancel = lang.getCancel();
         colorhexnamepoke = lang.getColorhexnamepoke();
-        descLevel = lang.getDescLevel();
-        descShiny = lang.getDescShiny();
-        descLegendary = lang.getDescLegendary();
-        descIvs = lang.getDescIvs();
-        descEvs = lang.getDescEvs();
-        descHappiness = lang.getDescHappiness();
-        descGender = lang.getDescGender();
-        descForm = lang.getDescForm();
-        descNature = lang.getDescNature();
-        descAbility = lang.getDescAbility();
-        descBall = lang.getDescBall();
         descprice = lang.getDescprice();
         nopokemon = lang.getNopokemon();
         titleconfirm = lang.getTitleconfirm();
@@ -208,6 +175,7 @@ public class Lang {
         titlePc = lang.getTitlePc();
         itempreviouspage = lang.getItempreviouspage();
         itemclose = lang.getItemclose();
+        pokemonLore = lang.getPokemonLore();
         itemnextpage = lang.getItemnextpage();
         Pc = lang.getPc();
         ItemGender = lang.getItemGender();
@@ -220,6 +188,8 @@ public class Lang {
         colorhexItem = lang.getColorhexItem();
         colorPrice = lang.getColorPrice();
         colorSeparator = lang.getColorSeparator();
+        separator = lang.getSeparator();
+        itemBlacklisted = lang.getItemBlacklisted();
 
         String data = gson.toJson(this);
         CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleSTS.path + "lang/", CobbleSTS.config.getLang() + ".json",

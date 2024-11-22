@@ -2,7 +2,7 @@ package com.kingpixel.cobblests.command;
 
 import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobblests.Config.STSPermission;
-import com.kingpixel.cobblests.utils.AdventureTranslator;
+import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;

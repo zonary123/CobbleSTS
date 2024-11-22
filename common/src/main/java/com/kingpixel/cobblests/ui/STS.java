@@ -12,9 +12,9 @@ import com.cobblemon.mod.common.item.PokemonItem;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobblests.ui.Info.STSInfo;
-import com.kingpixel.cobblests.utils.AdventureTranslator;
 import com.kingpixel.cobblests.utils.STSUtil;
-import com.kingpixel.cobblests.utils.Utils;
+import com.kingpixel.cobbleutils.util.AdventureTranslator;
+import com.kingpixel.cobbleutils.util.Utils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
@@ -40,8 +40,8 @@ public class STS {
       RateLimitedButton poke3 = createButtonPokemon(partyStore.get(2));
 
       GooeyButton info = GooeyButton.builder()
-        .display(Utils.parseItemId(CobbleSTS.language.getInfo().getId()))
-        .title(AdventureTranslator.toNative(CobbleSTS.language.getInfo().getTitle()))
+        .display(CobbleSTS.language.getInfo().getItemStack())
+        .title(AdventureTranslator.toNative(CobbleSTS.language.getInfo().getDisplayname()))
         .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getInfo().getLore()))
         .onClick((action) -> {
           if (CobbleSTS.config.isHiperinfo())
@@ -50,8 +50,8 @@ public class STS {
         .build();
 
       GooeyButton pc = GooeyButton.builder()
-        .display(Utils.parseItemId(CobbleSTS.language.getPc().getId()))
-        .title(AdventureTranslator.toNative(CobbleSTS.language.getPc().getTitle()))
+        .display(CobbleSTS.language.getPc().getItemStack())
+        .title(AdventureTranslator.toNative(CobbleSTS.language.getPc().getDisplayname()))
         .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getPc().getLore()))
         .onClick((action) -> {
           try {
@@ -89,23 +89,30 @@ public class STS {
 
   public static RateLimitedButton createButtonPokemon(Pokemon pokemon) {
     GooeyButton button;
+    boolean isblacklist = CobbleSTS.config.getBlacklisted().contains(pokemon.showdownId());
     try {
       if (pokemon == null) {
         button = GooeyButton.builder()
-          .display(Utils.parseItemId(CobbleSTS.language.getNopokemon().getId()))
-          .title(AdventureTranslator.toNative(CobbleSTS.language.getNopokemon().getTitle()))
+          .display(CobbleSTS.language.getNopokemon().getItemStack())
+          .title(AdventureTranslator.toNative(CobbleSTS.language.getNopokemon().getDisplayname()))
           .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getNopokemon().getLore()))
+          .build();
+      } else if (isblacklist) {
+        button = GooeyButton.builder()
+          .display(CobbleSTS.language.getItemBlacklisted().getItemStack())
+          .title(AdventureTranslator.toNative(CobbleSTS.language.getItemBlacklisted().getDisplayname()))
+          .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getItemBlacklisted().getLore()))
           .build();
       } else if (pokemon.getShiny() && !CobbleSTS.config.isAllowshiny()) {
         button = GooeyButton.builder()
-          .display(Utils.parseItemId(CobbleSTS.language.getItemNotAllowShiny().getId()))
-          .title(AdventureTranslator.toNative(CobbleSTS.language.getItemNotAllowShiny().getTitle()))
+          .display(CobbleSTS.language.getItemNotAllowShiny().getItemStack())
+          .title(AdventureTranslator.toNative(CobbleSTS.language.getItemNotAllowShiny().getDisplayname()))
           .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getItemNotAllowShiny().getLore()))
           .build();
       } else if ((pokemon.isLegendary() || CobbleSTS.config.getIslegends().contains(pokemon.getSpecies().getName())) && !CobbleSTS.config.isAllowlegendary()) {
         button = GooeyButton.builder()
-          .display(Utils.parseItemId(CobbleSTS.language.getItemNotAllowLegendary().getId()))
-          .title(AdventureTranslator.toNative(CobbleSTS.language.getItemNotAllowLegendary().getTitle()))
+          .display(CobbleSTS.language.getItemNotAllowLegendary().getItemStack())
+          .title(AdventureTranslator.toNative(CobbleSTS.language.getItemNotAllowLegendary().getDisplayname()))
           .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getItemNotAllowLegendary().getLore()))
           .build();
       } else {

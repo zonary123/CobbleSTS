@@ -6,7 +6,7 @@ import com.kingpixel.cobblests.Config.STSConfig;
 import com.kingpixel.cobblests.Config.STSPermission;
 import com.kingpixel.cobblests.command.CommandTree;
 import com.kingpixel.cobblests.manager.STSManager;
-import com.kingpixel.cobblests.utils.AdventureTranslator;
+import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
@@ -54,6 +54,19 @@ public class CobbleSTS {
     LifecycleEvent.SERVER_STARTED.register(server -> load());
     PlayerEvent.PLAYER_JOIN.register(player -> manager.addPlayer(player));
     LifecycleEvent.SERVER_LEVEL_LOAD.register(level -> server = level.getLevel().getServer());
+    LifecycleEvent.SERVER_STOPPING.register((server) -> {
+      tasks.forEach(task -> task.cancel(true));
+      tasks.clear();
+      scheduler.shutdown();
+      try {
+        if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+          scheduler.shutdownNow();
+        }
+      } catch (InterruptedException ex) {
+        scheduler.shutdownNow();
+      }
+      LOGGER.info("Stopping " + MOD_NAME);
+    });
   }
 
   private static void files() {

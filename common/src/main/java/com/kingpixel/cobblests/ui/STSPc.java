@@ -13,8 +13,8 @@ import com.cobblemon.mod.common.Cobblemon;
 import com.cobblemon.mod.common.api.storage.NoPokemonStoreException;
 import com.cobblemon.mod.common.api.storage.pc.PCStore;
 import com.kingpixel.cobblests.CobbleSTS;
-import com.kingpixel.cobblests.utils.AdventureTranslator;
-import com.kingpixel.cobblests.utils.Utils;
+import com.kingpixel.cobbleutils.util.AdventureTranslator;
+import com.kingpixel.cobbleutils.util.Utils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
@@ -35,20 +35,20 @@ public class STSPc {
     });
 
     LinkedPageButton previus = LinkedPageButton.builder()
-      .display(Utils.parseItemId(CobbleSTS.language.getItempreviouspage().getId()))
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItempreviouspage().getTitle()))
+      .display(CobbleSTS.language.getItempreviouspage().getItemStack())
+      .title(AdventureTranslator.toNative(CobbleSTS.language.getItempreviouspage().getDisplayname()))
       .linkType(LinkType.Previous)
       .build();
 
     LinkedPageButton next = LinkedPageButton.builder()
-      .display(Utils.parseItemId(CobbleSTS.language.getItemnextpage().getId()))
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemnextpage().getTitle()))
+      .display(CobbleSTS.language.getItemnextpage().getItemStack())
+      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemnextpage().getDisplayname()))
       .linkType(LinkType.Next)
       .build();
 
     GooeyButton close = GooeyButton.builder()
-      .display(Utils.parseItemId(CobbleSTS.language.getItemclose().getId()))
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemclose().getTitle()))
+      .display(CobbleSTS.language.getItemclose().getItemStack())
+      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemclose().getDisplayname()))
       .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getItemclose().getLore()))
       .onClick((action) -> {
         try {

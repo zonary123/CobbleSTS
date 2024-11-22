@@ -2,9 +2,10 @@ package com.kingpixel.cobblests.Config;
 
 import com.google.gson.Gson;
 import com.kingpixel.cobblests.CobbleSTS;
-import com.kingpixel.cobblests.utils.Utils;
+import com.kingpixel.cobbleutils.util.Utils;
 import lombok.Getter;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -16,63 +17,65 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public class Config {
   private String lang;
-  private String ecocommand;
+  private String currency;
+  private int guiinforows;
   private boolean allowshiny;
   private boolean allowlegendary;
   private boolean havecooldown;
   private boolean hiperinfo;
-  private int guiinforows;
   private int cooldown;
-  private int base;
-  private int level;
-  private int shiny;
-  private int legendary;
-  private int ivs;
-  private int evs;
-  private int happiness;
-  private int defaultgender;
-  private int defaultform;
-  private int defaultnature;
-  private int defaultability;
-  private int defaultball;
+  private BigDecimal base;
+  private BigDecimal level;
+  private BigDecimal shiny;
+  private BigDecimal legendary;
+  private BigDecimal ivs;
+  private BigDecimal evs;
+  private BigDecimal happiness;
+  private BigDecimal defaultgender;
+  private BigDecimal defaultform;
+  private BigDecimal defaultnature;
+  private BigDecimal defaultability;
+  private BigDecimal defaultball;
   private List<String> islegends;
-  private Map<String, Integer> legends;
-  private Map<String, Integer> gender;
-  private Map<String, Integer> form;
-  private Map<String, Integer> nature;
-  private Map<String, Integer> ability;
-  private Map<String, Integer> ball;
-  private Map<String, Integer> pokemon;
+  private List<String> blacklisted;
+  private Map<String, BigDecimal> legends;
+  private Map<String, BigDecimal> gender;
+  private Map<String, BigDecimal> form;
+  private Map<String, BigDecimal> nature;
+  private Map<String, BigDecimal> ability;
+  private Map<String, BigDecimal> ball;
+  private Map<String, BigDecimal> pokemon;
 
   public Config() {
     lang = "en";
-    ecocommand = "eco deposit %amount% dollars %player%";
+    currency = "dollars";
     guiinforows = 6;
     havecooldown = true;
     allowshiny = true;
     allowlegendary = true;
     hiperinfo = true;
     cooldown = 30;
-    base = 500;
-    level = 250;
-    shiny = 1000;
-    legendary = 5000;
-    ivs = 100;
-    evs = 100;
-    happiness = 100;
-    defaultgender = 0;
-    defaultform = 0;
-    defaultnature = 0;
-    defaultability = 0;
-    defaultball = 0;
+    base = BigDecimal.valueOf(500);
+    level = BigDecimal.valueOf(250);
+    shiny = BigDecimal.valueOf(1000);
+    legendary = BigDecimal.valueOf(5000);
+    ivs = BigDecimal.valueOf(100);
+    evs = BigDecimal.valueOf(100);
+    happiness = BigDecimal.valueOf(100);
+    defaultgender = BigDecimal.valueOf(0);
+    defaultform = BigDecimal.valueOf(0);
+    defaultnature = BigDecimal.valueOf(0);
+    defaultability = BigDecimal.valueOf(0);
+    defaultball = BigDecimal.valueOf(0);
+    blacklisted = List.of("Magikarp");
     islegends = List.of("Magikarp");
-    legends = Map.of("Articuno", 10000);
-    gender = Map.of("M", 0, "F", 0, "N", 0);
-    form = Map.of("Galar", 0);
-    nature = Map.of("Hardy", 0);
-    ability = Map.of("None", 0);
-    ball = Map.of("poke_ball", 0);
-    pokemon = Map.of("Magikarp", 100);
+    legends = Map.of("Articuno", BigDecimal.valueOf(10000));
+    gender = Map.of("M", BigDecimal.ZERO, "F", BigDecimal.ZERO, "N", BigDecimal.ZERO);
+    form = Map.of("Galar", BigDecimal.ZERO);
+    nature = Map.of("Hardy", BigDecimal.ZERO);
+    ability = Map.of("None", BigDecimal.ZERO);
+    ball = Map.of("poke_ball", BigDecimal.ZERO);
+    pokemon = Map.of("Magikarp", BigDecimal.valueOf(100));
   }
 
 
@@ -86,8 +89,8 @@ public class Config {
         guiinforows = config.getGuiinforows();
         havecooldown = config.isHavecooldown();
         cooldown = config.getCooldown();
-        ecocommand = config.getEcocommand();
         allowshiny = config.isAllowshiny();
+        blacklisted = config.getBlacklisted();
         allowlegendary = config.isAllowlegendary();
         legends = config.getLegends();
         base = config.getBase();
@@ -108,6 +111,9 @@ public class Config {
         ability = config.getAbility();
         ball = config.getBall();
         pokemon = config.getPokemon();
+        currency = config.getCurrency();
+        hiperinfo = config.isHiperinfo();
+
         String data = gson.toJson(this);
         CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleSTS.path, "config.json",
           data);

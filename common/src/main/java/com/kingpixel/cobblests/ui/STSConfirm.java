@@ -8,9 +8,9 @@ import com.cobblemon.mod.common.api.storage.NoPokemonStoreException;
 import com.cobblemon.mod.common.item.PokemonItem;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
-import com.kingpixel.cobblests.utils.AdventureTranslator;
 import com.kingpixel.cobblests.utils.STSUtil;
-import com.kingpixel.cobblests.utils.Utils;
+import com.kingpixel.cobbleutils.util.AdventureTranslator;
+import com.kingpixel.cobbleutils.util.Utils;
 import net.minecraft.network.chat.Component;
 
 import java.util.Objects;
@@ -25,8 +25,8 @@ public class STSConfirm {
       .title("")
       .build();
     GooeyButton confirm = GooeyButton.builder()
-      .display(Utils.parseItemId(CobbleSTS.language.getConfirm().getId()))
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getConfirm().getTitle()))
+      .display(CobbleSTS.language.getConfirm().getItemStack())
+      .title(AdventureTranslator.toNative(CobbleSTS.language.getConfirm().getDisplayname()))
       .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getConfirm().getLore()))
       .onClick(action -> {
         STSUtil.Sell(pokemon, true, action.getPlayer());
@@ -45,8 +45,8 @@ public class STSConfirm {
       .build();
 
     GooeyButton cancel = GooeyButton.builder()
-      .display(Utils.parseItemId(CobbleSTS.language.getCancel().getId()))
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getCancel().getTitle()))
+      .display(CobbleSTS.language.getCancel().getItemStack())
+      .title(AdventureTranslator.toNative(CobbleSTS.language.getCancel().getDisplayname()))
       .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getCancel().getLore()))
       .onClick(action -> {
         try {
