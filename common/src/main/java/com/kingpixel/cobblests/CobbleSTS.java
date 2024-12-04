@@ -1,15 +1,19 @@
 package com.kingpixel.cobblests;
 
+import com.cobblemon.mod.common.api.Priority;
+import com.cobblemon.mod.common.api.events.CobblemonEvents;
 import com.kingpixel.cobblests.Config.Config;
 import com.kingpixel.cobblests.Config.Lang;
 import com.kingpixel.cobblests.Config.STSConfig;
 import com.kingpixel.cobblests.Config.STSPermission;
 import com.kingpixel.cobblests.command.CommandTree;
 import com.kingpixel.cobblests.manager.STSManager;
+import com.kingpixel.cobblests.utils.STSUtil;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
+import kotlin.Unit;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -66,6 +70,13 @@ public class CobbleSTS {
         scheduler.shutdownNow();
       }
       LOGGER.info("Stopping " + MOD_NAME);
+    });
+
+    CobblemonEvents.POKEMON_RELEASED_EVENT_POST.subscribe(Priority.NORMAL, evt -> {
+      if (CobbleSTS.config.isReleasePokemon()) {
+        STSUtil.Sell(evt.getPokemon(), true, evt.getPlayer());
+      }
+      return Unit.INSTANCE;
     });
   }
 

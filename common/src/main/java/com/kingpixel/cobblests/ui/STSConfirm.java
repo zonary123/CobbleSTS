@@ -9,6 +9,8 @@ import com.cobblemon.mod.common.item.PokemonItem;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobblests.utils.STSUtil;
+import com.kingpixel.cobbleutils.CobbleUtils;
+import com.kingpixel.cobbleutils.Model.ItemModel;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import com.kingpixel.cobbleutils.util.Utils;
 import net.minecraft.network.chat.Component;
@@ -24,10 +26,14 @@ public class STSConfirm {
       .display(Utils.parseItemId(CobbleSTS.language.getFill()))
       .title("")
       .build();
+
+    ItemModel itemConfirm = CobbleSTS.language.getConfirm();
+    if (CobbleSTS.config.isUseCobbleUtilsItems()) {
+      itemConfirm = CobbleUtils.language.getItemConfirm();
+    }
+
     GooeyButton confirm = GooeyButton.builder()
-      .display(CobbleSTS.language.getConfirm().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getConfirm().getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getConfirm().getLore()))
+      .display(itemConfirm.getItemStack())
       .onClick(action -> {
         STSUtil.Sell(pokemon, true, action.getPlayer());
         try {
@@ -44,10 +50,12 @@ public class STSConfirm {
       .lore(Component.class, AdventureTranslator.toNativeL(STSUtil.formatPokemonLore(pokemon)))
       .build();
 
+    ItemModel itemCancel = CobbleSTS.language.getCancel();
+    if (CobbleSTS.config.isUseCobbleUtilsItems()) {
+      itemCancel = CobbleUtils.language.getItemCancel();
+    }
     GooeyButton cancel = GooeyButton.builder()
-      .display(CobbleSTS.language.getCancel().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getCancel().getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getCancel().getLore()))
+      .display(itemCancel.getItemStack())
       .onClick(action -> {
         try {
           UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STS.open(action.getPlayer())));

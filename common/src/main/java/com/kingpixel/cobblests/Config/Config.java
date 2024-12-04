@@ -16,6 +16,8 @@ import java.util.concurrent.CompletableFuture;
  */
 @Getter
 public class Config {
+  private boolean useCobbleUtilsItems;
+  private boolean releasePokemon;
   private String lang;
   private String currency;
   private int guiinforows;
@@ -47,6 +49,8 @@ public class Config {
   private Map<String, BigDecimal> pokemon;
 
   public Config() {
+    useCobbleUtilsItems = true;
+    releasePokemon = false;
     lang = "en";
     currency = "dollars";
     guiinforows = 6;
@@ -84,6 +88,7 @@ public class Config {
       el -> {
         Gson gson = Utils.newGson();
         Config config = gson.fromJson(el, Config.class);
+        useCobbleUtilsItems = config.isUseCobbleUtilsItems();
         islegends = config.getIslegends();
         lang = config.getLang();
         guiinforows = config.getGuiinforows();

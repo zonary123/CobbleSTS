@@ -96,7 +96,7 @@ public class Lang {
     itemNotAllowLegendary = new ItemModel("cobblemon:master_ball", "<gradient:#db2e2e:#e68c8c>Legendary not allowed", List.of(
       ""));
     info = new ItemModel("minecraft:book", "<gradient:#27b3cf:#88d4e3>Info Price", List.of(""));
-    nopokemon = new ItemModel("cobblemon:poke_ball", "<gradient:#db2e2e:#e68c8c>Empty slot", List.of(""));
+    nopokemon = CobbleUtils.language.getItemNoPokemon();
     confirm = CobbleUtils.language.getItemConfirm();
     cancel = CobbleUtils.language.getItemCancel();
     gender = Map.of("N", "&7None", "M", "&bMale", "F", "&dFemale");
@@ -104,11 +104,10 @@ public class Lang {
     nature = Map.of("Hardy", "Hardy");
     ability = Map.of("None", "None");
     ball = Map.of("poke_ball", "&c&lPoke &f&lBall", "master_ball", "§5Master Ball");
-    Pc = new ItemModel("cobblemon:pc", "&bPc", List.of(""));
-    itempreviouspage = new ItemModel("minecraft:arrow", "&7Previous Page", List.of("&7Click to go to the previous " +
-      "page"));
-    itemnextpage = new ItemModel("minecraft:arrow", "&7Next Page", List.of("&7Click to go to the next page"));
-    itemclose = new ItemModel("minecraft:barrier", "&cClose", List.of("&7Click to close the menu"));
+    Pc = CobbleUtils.language.getItemPc();
+    itempreviouspage = CobbleUtils.language.getItemPrevious();
+    itemnextpage = CobbleUtils.language.getItemNext();
+    itemclose = CobbleUtils.language.getItemClose();
     // Items info
     ItemGender = new ItemModel(10, "minecraft:light_blue_wool", "&bGender", List.of("&7Price default: %base%",
       "&7Click to open " +
@@ -149,8 +148,7 @@ public class Lang {
         sell = lang.getSell();
         fill = lang.getFill();
         info = lang.getInfo();
-        confirm = lang.getConfirm();
-        cancel = lang.getCancel();
+
         colorhexnamepoke = lang.getColorhexnamepoke();
         descprice = lang.getDescprice();
         nopokemon = lang.getNopokemon();
@@ -173,11 +171,9 @@ public class Lang {
         readytosell = lang.getReadytosell();
         messagecooldown = lang.getMessagecooldown();
         titlePc = lang.getTitlePc();
-        itempreviouspage = lang.getItempreviouspage();
-        itemclose = lang.getItemclose();
         pokemonLore = lang.getPokemonLore();
         itemnextpage = lang.getItemnextpage();
-        Pc = lang.getPc();
+
         ItemGender = lang.getItemGender();
         ItemForm = lang.getItemForm();
         ItemNature = lang.getItemNature();
@@ -190,6 +186,21 @@ public class Lang {
         colorSeparator = lang.getColorSeparator();
         separator = lang.getSeparator();
         itemBlacklisted = lang.getItemBlacklisted();
+        if (CobbleSTS.config.isUseCobbleUtilsItems()) {
+          itempreviouspage = CobbleUtils.language.getItemPrevious();
+          itemclose = CobbleUtils.language.getItemClose();
+          itemnextpage = CobbleUtils.language.getItemNext();
+          confirm = CobbleUtils.language.getItemConfirm();
+          cancel = CobbleUtils.language.getItemCancel();
+          Pc = CobbleUtils.language.getItemPc();
+        } else {
+          itempreviouspage = lang.getItempreviouspage();
+          itemclose = lang.getItemclose();
+          itemnextpage = lang.getItemnextpage();
+          confirm = lang.getConfirm();
+          cancel = lang.getCancel();
+          Pc = lang.getPc();
+        }
 
         String data = gson.toJson(this);
         CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleSTS.path + "lang/", CobbleSTS.config.getLang() + ".json",

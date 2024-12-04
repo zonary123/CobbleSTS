@@ -13,6 +13,8 @@ import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobblests.ui.Info.STSInfo;
 import com.kingpixel.cobblests.utils.STSUtil;
+import com.kingpixel.cobbleutils.CobbleUtils;
+import com.kingpixel.cobbleutils.Model.ItemModel;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import com.kingpixel.cobbleutils.util.Utils;
 import net.minecraft.network.chat.Component;
@@ -49,10 +51,15 @@ public class STS {
         })
         .build();
 
+      ItemModel itemPc = CobbleSTS.language.getPc();
+      if (CobbleSTS.config.isUseCobbleUtilsItems()) {
+        itemPc = CobbleUtils.language.getItemPc();
+      }
+
       GooeyButton pc = GooeyButton.builder()
-        .display(CobbleSTS.language.getPc().getItemStack())
-        .title(AdventureTranslator.toNative(CobbleSTS.language.getPc().getDisplayname()))
-        .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getPc().getLore()))
+        .display(itemPc.getItemStack())
+        .title(AdventureTranslator.toNative(itemPc.getDisplayname()))
+        .lore(Component.class, AdventureTranslator.toNativeL(itemPc.getLore()))
         .onClick((action) -> {
           try {
             UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSPc.open(player)));
@@ -78,7 +85,10 @@ public class STS {
         .set(1, 6, poke5)
         .set(1, 7, poke6)
         .build();
-      GooeyPage page = GooeyPage.builder().template(template).title(AdventureTranslator.toNative(CobbleSTS.language.getTitle())).build();
+      GooeyPage page = GooeyPage.builder()
+        .template(template)
+        .title(AdventureTranslator.toNative(CobbleSTS.language.getTitle()))
+        .build();
       page.update();
       return page;
     } catch (NoPokemonStoreException e) {
@@ -89,7 +99,10 @@ public class STS {
 
   public static RateLimitedButton createButtonPokemon(Pokemon pokemon) {
     GooeyButton button;
-    boolean isblacklist = CobbleSTS.config.getBlacklisted().contains(pokemon.showdownId());
+    boolean isblacklist = false;
+    if (pokemon != null) {
+      isblacklist = CobbleSTS.config.getBlacklisted().contains(pokemon.showdownId());
+    }
     try {
       if (pokemon == null) {
         button = GooeyButton.builder()

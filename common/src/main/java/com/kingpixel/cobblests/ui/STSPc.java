@@ -13,6 +13,8 @@ import com.cobblemon.mod.common.Cobblemon;
 import com.cobblemon.mod.common.api.storage.NoPokemonStoreException;
 import com.cobblemon.mod.common.api.storage.pc.PCStore;
 import com.kingpixel.cobblests.CobbleSTS;
+import com.kingpixel.cobbleutils.CobbleUtils;
+import com.kingpixel.cobbleutils.Model.ItemModel;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import com.kingpixel.cobbleutils.util.Utils;
 import net.minecraft.network.chat.Component;
@@ -34,22 +36,35 @@ public class STSPc {
       buttons.add(STS.createButtonPokemon(pokemon));
     });
 
+    ItemModel itemPrevious = CobbleSTS.language.getItempreviouspage();
+    if (CobbleSTS.config.isUseCobbleUtilsItems()) {
+      itemPrevious = CobbleUtils.language.getItemPrevious();
+    }
     LinkedPageButton previus = LinkedPageButton.builder()
-      .display(CobbleSTS.language.getItempreviouspage().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItempreviouspage().getDisplayname()))
+      .display(itemPrevious.getItemStack())
+      .title(AdventureTranslator.toNative(itemPrevious.getDisplayname()))
       .linkType(LinkType.Previous)
       .build();
 
+    ItemModel itemNext = CobbleSTS.language.getItemnextpage();
+    if (CobbleSTS.config.isUseCobbleUtilsItems()) {
+      itemNext = CobbleUtils.language.getItemNext();
+    }
+
     LinkedPageButton next = LinkedPageButton.builder()
-      .display(CobbleSTS.language.getItemnextpage().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemnextpage().getDisplayname()))
+      .display(itemNext.getItemStack())
+      .title(AdventureTranslator.toNative(itemNext.getDisplayname()))
       .linkType(LinkType.Next)
       .build();
 
+    ItemModel itemClose = CobbleSTS.language.getItemclose();
+    if (CobbleSTS.config.isUseCobbleUtilsItems()) {
+      itemClose = CobbleUtils.language.getItemClose();
+    }
     GooeyButton close = GooeyButton.builder()
-      .display(CobbleSTS.language.getItemclose().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemclose().getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getItemclose().getLore()))
+      .display(itemClose.getItemStack())
+      .title(AdventureTranslator.toNative(itemClose.getDisplayname()))
+      .lore(Component.class, AdventureTranslator.toNativeL(itemClose.getLore()))
       .onClick((action) -> {
         try {
           UIManager.openUIForcefully(action.getPlayer(), STS.open(player));
