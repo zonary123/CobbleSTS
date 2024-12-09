@@ -21,11 +21,15 @@ import java.util.List;
 public class STSUtil {
   public static List<String> formatPokemonLore(Pokemon pokemon) {
     List<String> lore = new ArrayList<>(PokemonUtils.replace(CobbleSTS.language.getPokemonLore(), pokemon));
-    lore.replaceAll(s -> s.replace("%price%", String.valueOf(Sell(pokemon, false, null))));
+    lore.replaceAll(s -> s.replace("%price%", String.valueOf(Sell(pokemon, false, null, false))));
     return lore;
   }
 
-  public static BigDecimal Sell(Pokemon pokemon, boolean execute, ServerPlayer player) {
+  public static BigDecimal Sell(Pokemon pokemon, boolean execute, ServerPlayer player, boolean release) {
+    boolean isBan = CobbleSTS.config.getBlacklisted().contains(pokemon.showdownId())
+      || (pokemon.getShiny() && !CobbleSTS.config.isAllowshiny())
+      || ((pokemon.isLegendary() || CobbleSTS.config.getIslegends().contains(pokemon.getSpecies().getName())) && !CobbleSTS.config.isAllowlegendary());
+    if (isBan) return BigDecimal.ZERO;
     BigDecimal price = CobbleSTS.config.getPokemon()
       .getOrDefault(pokemon.getSpecies().getName(), CobbleSTS.config.getBase());
 
@@ -76,11 +80,36 @@ public class STSUtil {
 
     price = price.setScale(2, RoundingMode.HALF_UP);
 
+    if (price.compareTo(BigDecimal.ZERO) <= 0) return BigDecimal.ZERO;
+
+
     if (execute) {
       try {
-        command(player, pokemon, price);
+        PlayerPartyStore partyStorageSlot = Cobblemon.INSTANCE.getStorage().getParty(player.getUUID());
+
+        CobbleSTS.manager.addPlayerWithDate(player, PlayerUtils.getCooldown(CobbleSTS.config.getCooldowns(),
+          CobbleSTS.config.getCooldown(), player
+        ));
+
+        if (release) {
+          BigDecimal lostAmount = price.multiply(CobbleSTS.config.getLostPriceForRelease());
+          price = price.subtract(lostAmount);
+        }
+
+        EconomyUtil.addMoney(player, CobbleSTS.config.getCurrency(), price);
+        if (!partyStorageSlot.remove(pokemon)) {
+          try {
+            Cobblemon.INSTANCE.getStorage().getPC(player.getUUID()).remove(pokemon);
+          } catch (NoPokemonStoreException e) {
+            throw new RuntimeException(e);
+          }
+        }
+        PlayerUtils.sendMessage(player, CobbleSTS.language.getSell()
+          .replace("%player%", player.getGameProfile().getName())
+          .replace("%pokemon%", pokemon.getSpecies().getName())
+          .replace("%price%", price.toString()), CobbleSTS.language.getPrefix());
       } catch (NoPokemonStoreException e) {
-        e.printStackTrace();
+        throw new RuntimeException(e);
       }
     } else {
       return price;
@@ -89,17 +118,4 @@ public class STSUtil {
     return price;
   }
 
-  private static void command(ServerPlayer player, Pokemon pokemon, BigDecimal price) throws NoPokemonStoreException {
-    PlayerPartyStore partyStorageSlot = Cobblemon.INSTANCE.getStorage().getParty(player.getUUID());
-    CobbleSTS.manager.addPlayerWithDate(player, CobbleSTS.config.getCooldown());
-
-    EconomyUtil.addMoney(player, CobbleSTS.config.getCurrency(), price);
-    if (!partyStorageSlot.remove(pokemon)) {
-      Cobblemon.INSTANCE.getStorage().getPC(player.getUUID()).remove(pokemon);
-    }
-    PlayerUtils.sendMessage(player, CobbleSTS.language.getSell()
-      .replace("%player%", player.getGameProfile().getName())
-      .replace("%pokemon%", pokemon.getSpecies().getName())
-      .replace("%price%", price.toString()), CobbleSTS.language.getPrefix());
-  }
 }

@@ -16,8 +16,10 @@ import java.util.concurrent.CompletableFuture;
  */
 @Getter
 public class Config {
+  private boolean debug;
   private boolean useCobbleUtilsItems;
   private boolean releasePokemon;
+  private BigDecimal lostPriceForRelease;
   private String lang;
   private String currency;
   private int guiinforows;
@@ -26,6 +28,7 @@ public class Config {
   private boolean havecooldown;
   private boolean hiperinfo;
   private int cooldown;
+  private Map<String, Integer> cooldowns;
   private BigDecimal base;
   private BigDecimal level;
   private BigDecimal shiny;
@@ -49,8 +52,10 @@ public class Config {
   private Map<String, BigDecimal> pokemon;
 
   public Config() {
+    debug = false;
     useCobbleUtilsItems = true;
     releasePokemon = false;
+    lostPriceForRelease = BigDecimal.valueOf(25);
     lang = "en";
     currency = "dollars";
     guiinforows = 6;
@@ -59,6 +64,11 @@ public class Config {
     allowlegendary = true;
     hiperinfo = true;
     cooldown = 30;
+    cooldowns = Map.of(
+      "group.vip", 20,
+      "group.vip+", 10,
+      "group.vip++", 5
+    );
     base = BigDecimal.valueOf(500);
     level = BigDecimal.valueOf(250);
     shiny = BigDecimal.valueOf(1000);
@@ -88,12 +98,14 @@ public class Config {
       el -> {
         Gson gson = Utils.newGson();
         Config config = gson.fromJson(el, Config.class);
+        debug = config.isDebug();
         useCobbleUtilsItems = config.isUseCobbleUtilsItems();
         islegends = config.getIslegends();
         lang = config.getLang();
         guiinforows = config.getGuiinforows();
         havecooldown = config.isHavecooldown();
         cooldown = config.getCooldown();
+        cooldowns = config.getCooldowns();
         allowshiny = config.isAllowshiny();
         blacklisted = config.getBlacklisted();
         allowlegendary = config.isAllowlegendary();
@@ -118,6 +130,9 @@ public class Config {
         pokemon = config.getPokemon();
         currency = config.getCurrency();
         hiperinfo = config.isHiperinfo();
+        releasePokemon = config.isReleasePokemon();
+        lostPriceForRelease = config.getLostPriceForRelease();
+
 
         String data = gson.toJson(this);
         CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleSTS.path, "config.json",

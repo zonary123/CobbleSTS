@@ -24,10 +24,6 @@
 
 # Changelog
 
-## [1.0.6]
-
-# Changelog
-
 ## [1.0.5]
 
 # Changelog

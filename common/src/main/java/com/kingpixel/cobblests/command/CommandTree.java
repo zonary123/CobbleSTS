@@ -1,7 +1,7 @@
 package com.kingpixel.cobblests.command;
 
 import com.kingpixel.cobblests.CobbleSTS;
-import com.kingpixel.cobblests.Config.STSPermission;
+import com.kingpixel.cobbleutils.api.PermissionApi;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -21,7 +21,9 @@ public class CommandTree {
     CommandDispatcher<CommandSourceStack> dispatcher
   ) {
     LiteralArgumentBuilder<CommandSourceStack> base = Commands.literal(literal)
-      .requires(source -> STSPermission.checkPermission(source, CobbleSTS.permissions.STS_BASE_PERMISSION));
+      .requires(source -> PermissionApi.hasPermission(
+        source, "cobblests.user", 2
+      ));
     // /sts
     dispatcher.register(
       base.executes(new CommandSTS())
@@ -30,9 +32,10 @@ public class CommandTree {
     // /sts other <player>
     dispatcher.register(
       base
-        .requires(source -> STSPermission.checkPermission(source, CobbleSTS.permissions.STS_RELOAD_PERMISSION))
         .then(Commands.literal("other")
-          .requires(source -> STSPermission.checkPermission(source, CobbleSTS.permissions.STS_RELOAD_PERMISSION))
+          .requires(source -> PermissionApi.hasPermission(
+            source, "cobblests.other", 2
+          ))
           .then(
             Commands.argument("player", EntityArgument.player())
               .executes(new CommandSTSOther())
@@ -41,9 +44,10 @@ public class CommandTree {
 
     // /sts reload
     dispatcher.register(base
-      .requires(source -> STSPermission.checkPermission(source, CobbleSTS.permissions.STS_RELOAD_PERMISSION))
       .then(Commands.literal("reload")
-        .requires(source -> STSPermission.checkPermission(source, CobbleSTS.permissions.STS_RELOAD_PERMISSION))
+        .requires(source -> PermissionApi.hasPermission(source,
+          "cobblests.reload", 2
+        ))
         .executes(context -> {
           CobbleSTS.load();
           Objects.requireNonNull(context.getSource().getPlayer()).sendSystemMessage(AdventureTranslator.toNative(CobbleSTS.language.getReload().replace("%prefix%", CobbleSTS.language.getPrefix())));
@@ -52,7 +56,9 @@ public class CommandTree {
 
     // /sts pc
     dispatcher.register(base.then(Commands.literal("pc")
-        .requires(source -> STSPermission.checkPermission(source, CobbleSTS.permissions.STS_BASE_PERMISSION))
+        .requires(source -> PermissionApi.hasPermission(
+          source, "cobblests.user", 2
+        ))
         .executes(new CommandSTSPC())
       )
     );

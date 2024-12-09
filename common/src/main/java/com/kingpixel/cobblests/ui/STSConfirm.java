@@ -35,7 +35,7 @@ public class STSConfirm {
     GooeyButton confirm = GooeyButton.builder()
       .display(itemConfirm.getItemStack())
       .onClick(action -> {
-        STSUtil.Sell(pokemon, true, action.getPlayer());
+        STSUtil.Sell(pokemon, true, action.getPlayer(), false);
         try {
           UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STS.open(action.getPlayer())));
         } catch (NoPokemonStoreException e) {

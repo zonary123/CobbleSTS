@@ -5,11 +5,11 @@ import com.cobblemon.mod.common.api.events.CobblemonEvents;
 import com.kingpixel.cobblests.Config.Config;
 import com.kingpixel.cobblests.Config.Lang;
 import com.kingpixel.cobblests.Config.STSConfig;
-import com.kingpixel.cobblests.Config.STSPermission;
 import com.kingpixel.cobblests.command.CommandTree;
 import com.kingpixel.cobblests.manager.STSManager;
 import com.kingpixel.cobblests.utils.STSUtil;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
+import com.kingpixel.cobbleutils.util.PlayerUtils;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
@@ -37,7 +37,6 @@ public class CobbleSTS {
   public static MinecraftServer server;
   public static Config config = new Config();
   public static STSConfig stspermission = new STSConfig();
-  public static STSPermission permissions = new STSPermission();
   public static STSManager manager = new STSManager();
   private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
   private static final List<ScheduledFuture<?>> tasks = new ArrayList<>();
@@ -74,11 +73,18 @@ public class CobbleSTS {
 
     CobblemonEvents.POKEMON_RELEASED_EVENT_POST.subscribe(Priority.NORMAL, evt -> {
       if (CobbleSTS.config.isReleasePokemon()) {
-        STSUtil.Sell(evt.getPokemon(), true, evt.getPlayer());
+        STSUtil.Sell(evt.getPokemon(), true, evt.getPlayer(), true);
       }
       return Unit.INSTANCE;
     });
+    CobblemonEvents.POKEMON_RELEASED_EVENT_PRE.subscribe(Priority.NORMAL, evt -> {
+
+      PlayerUtils.sendMessage(evt.getPlayer(),
+        "Ummm Rico Rico");
+      return Unit.INSTANCE;
+    });
   }
+
 
   private static void files() {
     language.init();
