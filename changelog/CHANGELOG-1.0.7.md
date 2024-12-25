@@ -1,5 +1,61 @@
 # Changelog
 
+## [1.0.7]
+
+# Changelog
+
+## [1.0.7]
+
+# Changelog
+
+## [1.0.7]
+
+# Changelog
+
+## [1.0.7]
+
+# Changelog
+
+## [1.0.7]
+
+# Changelog
+
+## [1.0.7]
+
+# Changelog
+
+## [1.0.7]
+
+# Changelog
+
+## [1.0.7]
+
+# Changelog
+
+## [1.0.7]
+
+# Changelog
+
+## [1.0.7]
+
+# Changelog
+
+## [1.0.7]
+
+# Changelog
+
+## [1.0.7]
+
+# Changelog
+
+## [1.0.7]
+
+# Changelog
+
+## [1.0.6]
+
+# Changelog
+
 ## [1.0.6]
 
 # Changelog

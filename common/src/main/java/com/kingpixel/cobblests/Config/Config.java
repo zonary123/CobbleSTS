@@ -19,6 +19,7 @@ public class Config {
   private boolean debug;
   private boolean useCobbleUtilsItems;
   private boolean releasePokemon;
+  private boolean notifyReady;
   private BigDecimal lostPriceForRelease;
   private String lang;
   private String currency;
@@ -28,14 +29,18 @@ public class Config {
   private boolean havecooldown;
   private boolean hiperinfo;
   private int cooldown;
+  private int decimals;
   private Map<String, Integer> cooldowns;
+  private String priceFormula;
+  private double shinyMultiplier;
+  private double legendaryMultiplier;
+  private double MythicalMultiplier;
+  private double UltraBeastMultiplier;
+  private BigDecimal limitPrice;
   private BigDecimal base;
-  private BigDecimal level;
   private BigDecimal shiny;
   private BigDecimal legendary;
-  private BigDecimal ivs;
-  private BigDecimal evs;
-  private BigDecimal happiness;
+  private BigDecimal ah;
   private BigDecimal defaultgender;
   private BigDecimal defaultform;
   private BigDecimal defaultnature;
@@ -43,18 +48,36 @@ public class Config {
   private BigDecimal defaultball;
   private List<String> islegends;
   private List<String> blacklisted;
-  private Map<String, BigDecimal> legends;
   private Map<String, BigDecimal> gender;
   private Map<String, BigDecimal> form;
   private Map<String, BigDecimal> nature;
   private Map<String, BigDecimal> ability;
   private Map<String, BigDecimal> ball;
+  private Map<String, BigDecimal> label;
   private Map<String, BigDecimal> pokemon;
 
   public Config() {
     debug = false;
     useCobbleUtilsItems = true;
     releasePokemon = false;
+    notifyReady = true;
+    priceFormula = "base + (level * 1) + priceShiny + (totalIvs * 1) + (averageIvs * 1) + (totalEvs " +
+      "* 1) + " +
+      "(averageEvs * 1)" +
+      " + label + " +
+      "(happiness * 1) " +
+      "+ gender + form + " +
+      "nature + " +
+      "ability + ball" +
+      " + (((catchRate / 100) * level" +
+      " + log" +
+      "(totalIvs)" +
+      "/2 + " +
+      "sqrt" +
+      "(totalEvs) - 1) * " +
+      "shinyMultiplier * " +
+      "legendaryMultiplier * mythicalMultiplier * ultraBeastMultiplier)";
+    decimals = 0;
     lostPriceForRelease = BigDecimal.valueOf(25);
     lang = "en";
     currency = "dollars";
@@ -69,27 +92,29 @@ public class Config {
       "group.vip+", 10,
       "group.vip++", 5
     );
-    base = BigDecimal.valueOf(500);
-    level = BigDecimal.valueOf(250);
-    shiny = BigDecimal.valueOf(1000);
-    legendary = BigDecimal.valueOf(5000);
-    ivs = BigDecimal.valueOf(100);
-    evs = BigDecimal.valueOf(100);
-    happiness = BigDecimal.valueOf(100);
+    limitPrice = BigDecimal.valueOf(0);
+    base = BigDecimal.valueOf(0);
+    shiny = BigDecimal.valueOf(0);
+    legendary = BigDecimal.valueOf(0);
+    ah = BigDecimal.valueOf(0);
     defaultgender = BigDecimal.valueOf(0);
     defaultform = BigDecimal.valueOf(0);
     defaultnature = BigDecimal.valueOf(0);
     defaultability = BigDecimal.valueOf(0);
     defaultball = BigDecimal.valueOf(0);
+    shinyMultiplier = 1.0;
+    legendaryMultiplier = 1.0;
+    MythicalMultiplier = 1.0;
+    UltraBeastMultiplier = 1.0;
     blacklisted = List.of("Magikarp");
     islegends = List.of("Magikarp");
-    legends = Map.of("Articuno", BigDecimal.valueOf(10000));
     gender = Map.of("M", BigDecimal.ZERO, "F", BigDecimal.ZERO, "N", BigDecimal.ZERO);
     form = Map.of("Galar", BigDecimal.ZERO);
     nature = Map.of("Hardy", BigDecimal.ZERO);
     ability = Map.of("None", BigDecimal.ZERO);
     ball = Map.of("poke_ball", BigDecimal.ZERO);
-    pokemon = Map.of("Magikarp", BigDecimal.valueOf(100));
+    pokemon = Map.of("Magikarp", BigDecimal.valueOf(0));
+    label = Map.of("gen1", BigDecimal.ZERO);
   }
 
 
@@ -107,16 +132,14 @@ public class Config {
         cooldown = config.getCooldown();
         cooldowns = config.getCooldowns();
         allowshiny = config.isAllowshiny();
+        decimals = config.getDecimals();
         blacklisted = config.getBlacklisted();
         allowlegendary = config.isAllowlegendary();
-        legends = config.getLegends();
+        notifyReady = config.isNotifyReady();
         base = config.getBase();
-        level = config.getLevel();
+        priceFormula = config.getPriceFormula();
         shiny = config.getShiny();
         legendary = config.getLegendary();
-        ivs = config.getIvs();
-        evs = config.getEvs();
-        happiness = config.getHappiness();
         defaultgender = config.getDefaultgender();
         defaultform = config.getDefaultform();
         defaultnature = config.getDefaultnature();
@@ -131,8 +154,14 @@ public class Config {
         currency = config.getCurrency();
         hiperinfo = config.isHiperinfo();
         releasePokemon = config.isReleasePokemon();
+        limitPrice = config.getLimitPrice();
         lostPriceForRelease = config.getLostPriceForRelease();
-
+        shinyMultiplier = config.getShinyMultiplier();
+        legendaryMultiplier = config.getLegendaryMultiplier();
+        MythicalMultiplier = config.getMythicalMultiplier();
+        UltraBeastMultiplier = config.getUltraBeastMultiplier();
+        label = config.getLabel();
+        ah = config.getAh();
 
         String data = gson.toJson(this);
         CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleSTS.path, "config.json",

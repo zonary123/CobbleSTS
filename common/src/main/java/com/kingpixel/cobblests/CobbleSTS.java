@@ -4,12 +4,10 @@ import com.cobblemon.mod.common.api.Priority;
 import com.cobblemon.mod.common.api.events.CobblemonEvents;
 import com.kingpixel.cobblests.Config.Config;
 import com.kingpixel.cobblests.Config.Lang;
-import com.kingpixel.cobblests.Config.STSConfig;
 import com.kingpixel.cobblests.command.CommandTree;
 import com.kingpixel.cobblests.manager.STSManager;
 import com.kingpixel.cobblests.utils.STSUtil;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
-import com.kingpixel.cobbleutils.util.PlayerUtils;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
@@ -36,7 +34,6 @@ public class CobbleSTS {
   public static Lang language = new Lang();
   public static MinecraftServer server;
   public static Config config = new Config();
-  public static STSConfig stspermission = new STSConfig();
   public static STSManager manager = new STSManager();
   private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
   private static final List<ScheduledFuture<?>> tasks = new ArrayList<>();
@@ -53,6 +50,7 @@ public class CobbleSTS {
   }
 
   private static void events() {
+    files();
     CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> CommandTree.register(dispatcher));
     LifecycleEvent.SERVER_STARTED.register(server -> load());
     PlayerEvent.PLAYER_JOIN.register(player -> manager.addPlayer(player));
@@ -77,12 +75,6 @@ public class CobbleSTS {
       }
       return Unit.INSTANCE;
     });
-    CobblemonEvents.POKEMON_RELEASED_EVENT_PRE.subscribe(Priority.NORMAL, evt -> {
-
-      PlayerUtils.sendMessage(evt.getPlayer(),
-        "Ummm Rico Rico");
-      return Unit.INSTANCE;
-    });
   }
 
 
@@ -92,6 +84,7 @@ public class CobbleSTS {
   }
 
   private static void tasks() {
+    if (!config.isNotifyReady()) return;
     for (ScheduledFuture<?> task : tasks) {
       if (task != null && !task.isCancelled()) {
         task.cancel(false);

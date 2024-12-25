@@ -81,13 +81,8 @@ public class STSInfo {
       .onClick(action -> UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSBall.open())))
       .build();
 
-    Pokemon pokemon;
-    if (CobbleSTS.language.getItemLegends().getItem().contains("pokemon:")) {
-      pokemon =
-        PokemonProperties.Companion.parse(CobbleSTS.language.getItemPokemon().getItem().replace("pokemon:", "")).create();
-    } else {
-      pokemon = PokemonProperties.Companion.parse(getKey(CobbleSTS.config.getPokemon())).create();
-    }
+    Pokemon pokemon = PokemonProperties.Companion.parse(getKey(CobbleSTS.config.getPokemon())).create();
+
 
     List<String> lorepokemon = new ArrayList<>(CobbleSTS.language.getItemPokemon().getLore());
     lorepokemon.replaceAll(s -> s.replace("%base%", String.valueOf(CobbleSTS.config.getBase())));
@@ -97,24 +92,6 @@ public class STSInfo {
       .title(AdventureTranslator.toNative(CobbleSTS.language.getItemPokemon().getDisplayname()))
       .lore(Component.class, AdventureTranslator.toNativeL(lorepokemon))
       .onClick(action -> UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSPokemon.open())))
-      .build();
-
-    Pokemon pLegend;
-    if (CobbleSTS.language.getItemLegends().getItem().contains("pokemon:")) {
-      pLegend =
-        PokemonProperties.Companion.parse(CobbleSTS.language.getItemLegends().getItem().replace("pokemon:", "")).create();
-    } else {
-      pLegend = PokemonProperties.Companion.parse(getKey(CobbleSTS.config.getLegends())).create();
-    }
-
-    List<String> lorelegends = new ArrayList<>(CobbleSTS.language.getItemLegends().getLore());
-    lorelegends.replaceAll(s -> s.replace("%base%", String.valueOf(CobbleSTS.config.getLegendary())));
-
-    GooeyButton legends = GooeyButton.builder()
-      .display(PokemonItem.from(pLegend))
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemLegends().getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(lorelegends))
-      .onClick(action -> UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSLegend.open())))
       .build();
 
     GooeyButton cancel = GooeyButton.builder()
@@ -138,8 +115,7 @@ public class STSInfo {
       .set(CobbleSTS.language.getItemNature().getSlot(), nature)
       .set(CobbleSTS.language.getItemAbility().getSlot(), ability)
       .set(CobbleSTS.language.getItemBall().getSlot(), ball)
-      .set(CobbleSTS.language.getItemPokemon().getSlot(), pokemonb)
-      .set(CobbleSTS.language.getItemLegends().getSlot(), legends);
+      .set(CobbleSTS.language.getItemPokemon().getSlot(), pokemonb);
 
 
     return GooeyPage.builder().title(AdventureTranslator.toNative(CobbleSTS.language.getTitleInfo())).template(template).build();

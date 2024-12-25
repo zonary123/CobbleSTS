@@ -9,9 +9,10 @@ import com.kingpixel.cobbleutils.util.EconomyUtil;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
 import com.kingpixel.cobbleutils.util.PokemonUtils;
 import net.minecraft.server.level.ServerPlayer;
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,63 +26,74 @@ public class STSUtil {
     return lore;
   }
 
+  public static BigDecimal getPrice(Pokemon pokemon) {
+    return Sell(pokemon, false, null, false);
+  }
+
   public static BigDecimal Sell(Pokemon pokemon, boolean execute, ServerPlayer player, boolean release) {
     boolean isBan = CobbleSTS.config.getBlacklisted().contains(pokemon.showdownId())
       || (pokemon.getShiny() && !CobbleSTS.config.isAllowshiny())
-      || ((pokemon.isLegendary() || CobbleSTS.config.getIslegends().contains(pokemon.getSpecies().getName())) && !CobbleSTS.config.isAllowlegendary());
+      || ((pokemon.isLegendary() || CobbleSTS.config.getIslegends().contains(pokemon.showdownId())) && !CobbleSTS.config.isAllowlegendary());
     if (isBan) return BigDecimal.ZERO;
-    BigDecimal price = CobbleSTS.config.getPokemon()
-      .getOrDefault(pokemon.getSpecies().getName(), CobbleSTS.config.getBase());
 
-    // Level
-    price = price.add(BigDecimal.valueOf(pokemon.getLevel()).multiply(CobbleSTS.config.getLevel()));
-
-    // Shiny
-    if (pokemon.getShiny()) {
-      price = price.add(CobbleSTS.config.getShiny());
+    double base = CobbleSTS.config.getPokemon().getOrDefault(pokemon.showdownId(), CobbleSTS.config.getBase()).doubleValue();
+    double shiny = pokemon.getShiny() ? CobbleSTS.config.getShiny().doubleValue() : 0;
+    double label = 0;
+    for (String s : pokemon.getForm().getLabels()) {
+      label += CobbleSTS.config.getLabel().getOrDefault(s, BigDecimal.ZERO).doubleValue();
     }
+    double happiness = pokemon.getFriendship();
+    double gender = CobbleSTS.config.getGender()
+      .getOrDefault(pokemon.getGender().getShowdownName(), CobbleSTS.config.getDefaultability()).doubleValue();
+    double form = CobbleSTS.config.getForm()
+      .getOrDefault(pokemon.getForm().getName(), CobbleSTS.config.getDefaultform()).doubleValue();
+    double nature = CobbleSTS.config.getNature()
+      .getOrDefault(pokemon.getNature().getName().getNamespace(), CobbleSTS.config.getDefaultnature()).doubleValue();
+    double ability = PokemonUtils.isAH(pokemon) ? CobbleSTS.config.getAh().doubleValue() : CobbleSTS.config.getAbility()
+      .getOrDefault(pokemon.getAbility().getName(), CobbleSTS.config.getDefaultability()).doubleValue();
+    double ball = CobbleSTS.config.getBall()
+      .getOrDefault(pokemon.getCaughtBall().getName().getPath(), CobbleSTS.config.getDefaultball()).doubleValue();
+    double catchRate = pokemon.getForm().getCatchRate();
+    double level = pokemon.getLevel();
+    double totalIVs = PokemonUtils.getIvsTotal(pokemon.getIvs());
+    double totalEVs = PokemonUtils.getEvsTotal(pokemon.getEvs());
+    double averageIVs = PokemonUtils.getIvsAverage(pokemon.getIvs());
+    double averageEVs = PokemonUtils.getEvsAverage(pokemon.getEvs());
+    double shinyMultiplier = pokemon.getShiny() ? CobbleSTS.config.getShinyMultiplier() : 1.0;
+    double legendaryMultiplier = pokemon.isLegendary() ? CobbleSTS.config.getLegendaryMultiplier() : 1.0;
+    double mythicalMultiplier = pokemon.isMythical() ? CobbleSTS.config.getMythicalMultiplier() : 1.0;
+    double ultraBeastMultiplier = pokemon.isUltraBeast() ? CobbleSTS.config.getUltraBeastMultiplier() : 1.0;
 
-    // Legendary
-    if (pokemon.isLegendary()) {
-      price = price.add(CobbleSTS.config.getLegendary());
-    }
 
-    // Ivs
-    price = price.add(BigDecimal.valueOf(PokemonUtils.getIvsAverage(pokemon.getIvs()))
-      .multiply(CobbleSTS.config.getIvs()));
+    String formula = CobbleSTS.config.getPriceFormula();
+    formula = formula.replace("base", String.valueOf(base))
+      .replace("priceShiny", String.valueOf(shiny))
+      .replace("happiness", String.valueOf(happiness))
+      .replace("gender", String.valueOf(gender))
+      .replace("form", String.valueOf(form))
+      .replace("nature", String.valueOf(nature))
+      .replace("ability", String.valueOf(ability))
+      .replace("ball", String.valueOf(ball))
+      .replace("catchRate", String.valueOf(catchRate))
+      .replace("level", String.valueOf(level))
+      .replace("totalIvs", String.valueOf(totalIVs))
+      .replace("totalEvs", String.valueOf(totalEVs))
+      .replace("shinyMultiplier", String.valueOf(shinyMultiplier))
+      .replace("legendaryMultiplier", String.valueOf(legendaryMultiplier))
+      .replace("mythicalMultiplier", String.valueOf(mythicalMultiplier))
+      .replace("ultraBeastMultiplier", String.valueOf(ultraBeastMultiplier))
+      .replace("averageIvs", String.valueOf(averageIVs))
+      .replace("averageEvs", String.valueOf(averageEVs))
+      .replace("label", String.valueOf(label));
 
-    // Evs
-    price = price.add(BigDecimal.valueOf(PokemonUtils.getEvsAverage(pokemon.getEvs()))
-      .multiply(CobbleSTS.config.getEvs()));
+    Expression expression = new ExpressionBuilder(formula)
+      .build();
+    BigDecimal price = BigDecimal.valueOf(expression.evaluate()).setScale(2, BigDecimal.ROUND_HALF_UP);
 
-    // Happiness
-    price = price.add(BigDecimal.valueOf(pokemon.getFriendship())
-      .multiply(CobbleSTS.config.getHappiness()));
 
-    // Gender
-    price = price.add(CobbleSTS.config.getGender()
-      .getOrDefault(pokemon.getGender().getShowdownName(), CobbleSTS.config.getDefaultgender()));
-
-    // Form
-    price = price.add(CobbleSTS.config.getForm()
-      .getOrDefault(pokemon.getForm().getName(), CobbleSTS.config.getDefaultform()));
-
-    // Nature
-    price = price.add(CobbleSTS.config.getNature()
-      .getOrDefault(pokemon.getNature().getDisplayName().split("\\.")[2], CobbleSTS.config.getDefaultnature()));
-
-    // Ability
-    price = price.add(CobbleSTS.config.getAbility()
-      .getOrDefault(pokemon.getAbility().getDisplayName().split("\\.")[2], CobbleSTS.config.getDefaultability()));
-
-    // Ball
-    price = price.add(CobbleSTS.config.getBall()
-      .getOrDefault(pokemon.getCaughtBall().getName().getPath(), CobbleSTS.config.getDefaultball()));
-
-    price = price.setScale(2, RoundingMode.HALF_UP);
+    if (price.compareTo(CobbleSTS.config.getLimitPrice()) > 0) price = CobbleSTS.config.getLimitPrice();
 
     if (price.compareTo(BigDecimal.ZERO) <= 0) return BigDecimal.ZERO;
-
 
     if (execute) {
       try {

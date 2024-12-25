@@ -59,7 +59,6 @@ public class Lang {
   private ItemModel ItemAbility;
   private ItemModel ItemBall;
   private ItemModel ItemPokemon;
-  private ItemModel ItemLegends;
   private Map<String, String> gender;
   private Map<String, String> form;
   private Map<String, String> nature;
@@ -132,9 +131,6 @@ public class Lang {
     ItemPokemon = new ItemModel(31, "pokemon:squirtle", "&bPokemon", List.of("&7Not have price default", "&7Click to " +
       "open for more " +
       "information"), 0);
-    ItemLegends = new ItemModel(33, "pokemon:squirtle", "&bLegends", List.of("&7Not have price default", "&7Click to " +
-      "open for more " +
-      "information"), 0);
   }
 
   public void init() {
@@ -180,7 +176,6 @@ public class Lang {
         ItemAbility = lang.getItemAbility();
         ItemBall = lang.getItemBall();
         ItemPokemon = lang.getItemPokemon();
-        ItemLegends = lang.getItemLegends();
         colorhexItem = lang.getColorhexItem();
         colorPrice = lang.getColorPrice();
         colorSeparator = lang.getColorSeparator();
