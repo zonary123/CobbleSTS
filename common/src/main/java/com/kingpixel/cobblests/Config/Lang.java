@@ -181,21 +181,13 @@ public class Lang {
         colorSeparator = lang.getColorSeparator();
         separator = lang.getSeparator();
         itemBlacklisted = lang.getItemBlacklisted();
-        if (CobbleSTS.config.isUseCobbleUtilsItems()) {
-          itempreviouspage = CobbleUtils.language.getItemPrevious();
-          itemclose = CobbleUtils.language.getItemClose();
-          itemnextpage = CobbleUtils.language.getItemNext();
-          confirm = CobbleUtils.language.getItemConfirm();
-          cancel = CobbleUtils.language.getItemCancel();
-          Pc = CobbleUtils.language.getItemPc();
-        } else {
-          itempreviouspage = lang.getItempreviouspage();
-          itemclose = lang.getItemclose();
-          itemnextpage = lang.getItemnextpage();
-          confirm = lang.getConfirm();
-          cancel = lang.getCancel();
-          Pc = lang.getPc();
-        }
+        itempreviouspage = lang.getItempreviouspage();
+        itemclose = lang.getItemclose();
+        itemnextpage = lang.getItemnextpage();
+        confirm = lang.getConfirm();
+        cancel = lang.getCancel();
+        Pc = lang.getPc();
+
 
         String data = gson.toJson(this);
         CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleSTS.path + "lang/", CobbleSTS.config.getLang() + ".json",

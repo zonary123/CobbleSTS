@@ -13,12 +13,12 @@ import com.cobblemon.mod.common.Cobblemon;
 import com.cobblemon.mod.common.api.storage.NoPokemonStoreException;
 import com.cobblemon.mod.common.api.storage.pc.PCStore;
 import com.kingpixel.cobblests.CobbleSTS;
-import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.Model.ItemModel;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import com.kingpixel.cobbleutils.util.Utils;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,44 +27,30 @@ import java.util.List;
  * @author Carlos Varas Alonso - 25/06/2024 4:02
  */
 public class STSPc {
-  public static LinkedPage open(Player player) throws NoPokemonStoreException {
+  public static LinkedPage open(ServerPlayerEntity player) throws NoPokemonStoreException {
     ChestTemplate template = ChestTemplate.builder(6).build();
     List<Button> buttons = new ArrayList<>();
-    PCStore pcStore = Cobblemon.INSTANCE.getStorage().getPC(player.getUUID());
+    PCStore pcStore = Cobblemon.INSTANCE.getStorage().getPC(player);
 
     pcStore.forEach((pokemon) -> {
       buttons.add(STS.createButtonPokemon(pokemon));
     });
 
     ItemModel itemPrevious = CobbleSTS.language.getItempreviouspage();
-    if (CobbleSTS.config.isUseCobbleUtilsItems()) {
-      itemPrevious = CobbleUtils.language.getItemPrevious();
-    }
     LinkedPageButton previus = LinkedPageButton.builder()
       .display(itemPrevious.getItemStack())
-      .title(AdventureTranslator.toNative(itemPrevious.getDisplayname()))
       .linkType(LinkType.Previous)
       .build();
 
     ItemModel itemNext = CobbleSTS.language.getItemnextpage();
-    if (CobbleSTS.config.isUseCobbleUtilsItems()) {
-      itemNext = CobbleUtils.language.getItemNext();
-    }
-
     LinkedPageButton next = LinkedPageButton.builder()
       .display(itemNext.getItemStack())
-      .title(AdventureTranslator.toNative(itemNext.getDisplayname()))
       .linkType(LinkType.Next)
       .build();
 
     ItemModel itemClose = CobbleSTS.language.getItemclose();
-    if (CobbleSTS.config.isUseCobbleUtilsItems()) {
-      itemClose = CobbleUtils.language.getItemClose();
-    }
     GooeyButton close = GooeyButton.builder()
       .display(itemClose.getItemStack())
-      .title(AdventureTranslator.toNative(itemClose.getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(itemClose.getLore()))
       .onClick((action) -> {
         try {
           UIManager.openUIForcefully(action.getPlayer(), STS.open(player));
@@ -75,8 +61,12 @@ public class STSPc {
       .build();
 
     PlaceholderButton placeholder = new PlaceholderButton();
+    ItemStack itemFill = Utils.parseItemId(CobbleSTS.language.getFill());
+    itemFill.set(DataComponentTypes.ITEM_NAME, AdventureTranslator.toNative(""));
     GooeyButton fill =
-      GooeyButton.builder().display(Utils.parseItemId(CobbleSTS.language.getFill()).setHoverName(Component.literal(""))).build();
+      GooeyButton.builder()
+        .display(itemFill)
+        .build();
     template.fill(fill)
       .rectangle(0, 0, 5, 9, placeholder)
       .fillFromList(buttons)

@@ -12,7 +12,8 @@ import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobblests.ui.STS;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import com.kingpixel.cobbleutils.util.Utils;
-import net.minecraft.network.chat.Component;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.LoreComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class STSInfo {
 
     GooeyButton fill = GooeyButton.builder()
       .display(Utils.parseItemId(CobbleSTS.language.getFill()))
-      .title("")
+      .with(DataComponentTypes.ITEM_NAME, AdventureTranslator.toNative(""))
       .build();
 
     List<String> loregender = new ArrayList<>(CobbleSTS.language.getItemGender().getLore());
@@ -36,8 +37,9 @@ public class STSInfo {
 
     GooeyButton gender = GooeyButton.builder()
       .display(CobbleSTS.language.getItemGender().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemGender().getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(loregender))
+      .with(DataComponentTypes.ITEM_NAME,
+        AdventureTranslator.toNative(CobbleSTS.language.getItemGender().getDisplayname()))
+      .with(DataComponentTypes.LORE, new LoreComponent(AdventureTranslator.toNativeL(loregender)))
       .onClick(action -> UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSGender.open())))
       .build();
 
@@ -46,8 +48,9 @@ public class STSInfo {
 
     GooeyButton form = GooeyButton.builder()
       .display(CobbleSTS.language.getItemForm().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemForm().getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(loreform))
+      .with(DataComponentTypes.ITEM_NAME,
+        AdventureTranslator.toNative(CobbleSTS.language.getItemForm().getDisplayname()))
+      .with(DataComponentTypes.LORE, new LoreComponent(AdventureTranslator.toNativeL(loreform)))
       .onClick(action -> UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSForm.open())))
       .build();
 
@@ -56,8 +59,9 @@ public class STSInfo {
 
     GooeyButton nature = GooeyButton.builder()
       .display(CobbleSTS.language.getItemNature().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemNature().getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(lorenature))
+      .with(DataComponentTypes.ITEM_NAME,
+        AdventureTranslator.toNative(CobbleSTS.language.getItemNature().getDisplayname()))
+      .with(DataComponentTypes.LORE, new LoreComponent(AdventureTranslator.toNativeL(lorenature)))
       .onClick(action -> UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSNature.open())))
       .build();
 
@@ -66,8 +70,9 @@ public class STSInfo {
 
     GooeyButton ability = GooeyButton.builder()
       .display(CobbleSTS.language.getItemAbility().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemAbility().getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(loreability))
+      .with(DataComponentTypes.ITEM_NAME,
+        AdventureTranslator.toNative(CobbleSTS.language.getItemAbility().getDisplayname()))
+      .with(DataComponentTypes.LORE, new LoreComponent(AdventureTranslator.toNativeL(loreability)))
       .onClick(action -> UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSAbility.open())))
       .build();
 
@@ -76,8 +81,9 @@ public class STSInfo {
 
     GooeyButton ball = GooeyButton.builder()
       .display(CobbleSTS.language.getItemBall().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemBall().getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(loreball))
+      .with(DataComponentTypes.ITEM_NAME,
+        AdventureTranslator.toNative(CobbleSTS.language.getItemBall().getDisplayname()))
+      .with(DataComponentTypes.LORE, new LoreComponent(AdventureTranslator.toNativeL(loreball)))
       .onClick(action -> UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSBall.open())))
       .build();
 
@@ -89,15 +95,18 @@ public class STSInfo {
 
     GooeyButton pokemonb = GooeyButton.builder()
       .display(PokemonItem.from(pokemon))
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemPokemon().getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(lorepokemon))
+      .with(DataComponentTypes.ITEM_NAME,
+        AdventureTranslator.toNative(CobbleSTS.language.getItemPokemon().getDisplayname()))
+      .with(DataComponentTypes.LORE, new LoreComponent(AdventureTranslator.toNativeL(lorepokemon)))
       .onClick(action -> UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STSPokemon.open())))
       .build();
 
     GooeyButton cancel = GooeyButton.builder()
       .display(CobbleSTS.language.getItemclose().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemclose().getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getItemclose().getLore()))
+      .with(DataComponentTypes.ITEM_NAME,
+        AdventureTranslator.toNative(CobbleSTS.language.getItemclose().getDisplayname()))
+      .with(DataComponentTypes.LORE,
+        new LoreComponent(AdventureTranslator.toNativeL(CobbleSTS.language.getItemclose().getLore())))
       .onClick(action -> {
         try {
           UIManager.openUIForcefully(action.getPlayer(), Objects.requireNonNull(STS.open(action.getPlayer())));

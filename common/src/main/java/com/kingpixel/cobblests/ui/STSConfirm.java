@@ -9,11 +9,11 @@ import com.cobblemon.mod.common.item.PokemonItem;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobblests.utils.STSUtil;
-import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.Model.ItemModel;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import com.kingpixel.cobbleutils.util.Utils;
-import net.minecraft.network.chat.Component;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.LoreComponent;
 
 import java.util.Objects;
 
@@ -24,14 +24,10 @@ public class STSConfirm {
   public static GooeyPage open(Pokemon pokemon) {
     GooeyButton fill = GooeyButton.builder()
       .display(Utils.parseItemId(CobbleSTS.language.getFill()))
-      .title("")
+      .with(DataComponentTypes.CUSTOM_NAME, AdventureTranslator.toNative(""))
       .build();
 
     ItemModel itemConfirm = CobbleSTS.language.getConfirm();
-    if (CobbleSTS.config.isUseCobbleUtilsItems()) {
-      itemConfirm = CobbleUtils.language.getItemConfirm();
-    }
-
     GooeyButton confirm = GooeyButton.builder()
       .display(itemConfirm.getItemStack())
       .onClick(action -> {
@@ -46,14 +42,12 @@ public class STSConfirm {
 
     GooeyButton pokebutton = GooeyButton.builder()
       .display(PokemonItem.from(pokemon))
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getColorhexnamepoke() + pokemon.getSpecies().getName()))
-      .lore(Component.class, AdventureTranslator.toNativeL(STSUtil.formatPokemonLore(pokemon)))
+      .with(DataComponentTypes.ITEM_NAME,
+        AdventureTranslator.toNative(CobbleSTS.language.getColorhexnamepoke() + pokemon.getSpecies().getName()))
+      .with(DataComponentTypes.LORE, new LoreComponent(AdventureTranslator.toNativeL(STSUtil.formatPokemonLore(pokemon))))
       .build();
 
     ItemModel itemCancel = CobbleSTS.language.getCancel();
-    if (CobbleSTS.config.isUseCobbleUtilsItems()) {
-      itemCancel = CobbleUtils.language.getItemCancel();
-    }
     GooeyButton cancel = GooeyButton.builder()
       .display(itemCancel.getItemStack())
       .onClick(action -> {

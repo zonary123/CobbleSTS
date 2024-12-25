@@ -6,16 +6,16 @@ import com.kingpixel.cobblests.ui.STSPc;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 /**
  * @author Carlos Varas Alonso - 25/06/2024 4:18
  */
-public class CommandSTSPC implements Command<CommandSourceStack> {
+public class CommandSTSPC implements Command<ServerCommandSource> {
 
-  @Override public int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-    ServerPlayer player = context.getSource().getPlayerOrException();
+  @Override public int run(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+    ServerPlayerEntity player = context.getSource().getPlayerOrThrow();
     try {
       UIManager.openUIForcefully(player, STSPc.open(player));
     } catch (NoPokemonStoreException e) {

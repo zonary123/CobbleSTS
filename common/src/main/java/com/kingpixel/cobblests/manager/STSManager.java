@@ -1,8 +1,8 @@
 package com.kingpixel.cobblests.manager;
 
 import com.kingpixel.cobblests.CobbleSTS;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.entity.Entity;
+import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -52,11 +52,11 @@ public class STSManager {
 
 
   public void addPlayer(Entity player) {
-    userInfo.putIfAbsent(player.getUUID(), new UserInfo(new Date()));
+    userInfo.putIfAbsent(player.getUuid(), new UserInfo(new Date()));
   }
 
   public void init() {
-    for (ServerPlayer player : CobbleSTS.server.getPlayerList().getPlayers()) {
+    for (ServerPlayerEntity player : CobbleSTS.server.getPlayerManager().getPlayerList()) {
       addPlayer(player);
     }
   }
@@ -65,12 +65,12 @@ public class STSManager {
     Calendar calendar = Calendar.getInstance();
     calendar.add(Calendar.MINUTE, minutes);
     Date futureDate = calendar.getTime();
-    userInfo.put(player.getUUID(), new UserInfo(futureDate));
-    userInfo.get(player.getUUID()).setMessagesend(false);
+    userInfo.put(player.getUuid(), new UserInfo(futureDate));
+    userInfo.get(player.getUuid()).setMessagesend(false);
   }
 
   public boolean hasCooldownEnded(Entity player) {
-    UserInfo userDate = userInfo.get(player.getUUID());
+    UserInfo userDate = userInfo.get(player.getUuid());
     if (userDate == null) {
       return true;
     }
@@ -80,7 +80,7 @@ public class STSManager {
   }
 
   public String formatTime(Entity player) {
-    UserInfo userDate = userInfo.get(player.getUUID());
+    UserInfo userDate = userInfo.get(player.getUuid());
     if (userDate == null) {
       return "0";
     }

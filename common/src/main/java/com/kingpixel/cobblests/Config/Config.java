@@ -17,7 +17,6 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public class Config {
   private boolean debug;
-  private boolean useCobbleUtilsItems;
   private boolean releasePokemon;
   private boolean notifyReady;
   private BigDecimal lostPriceForRelease;
@@ -58,7 +57,6 @@ public class Config {
 
   public Config() {
     debug = false;
-    useCobbleUtilsItems = true;
     releasePokemon = false;
     notifyReady = true;
     priceFormula = "base + (level * 1) + priceShiny + (totalIvs * 1) + (averageIvs * 1) + (totalEvs " +
@@ -124,7 +122,6 @@ public class Config {
         Gson gson = Utils.newGson();
         Config config = gson.fromJson(el, Config.class);
         debug = config.isDebug();
-        useCobbleUtilsItems = config.isUseCobbleUtilsItems();
         islegends = config.getIslegends();
         lang = config.getLang();
         guiinforows = config.getGuiinforows();

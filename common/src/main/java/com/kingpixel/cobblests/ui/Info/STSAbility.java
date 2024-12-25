@@ -12,7 +12,9 @@ import ca.landonjw.gooeylibs2.api.template.types.ChestTemplate;
 import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import com.kingpixel.cobbleutils.util.Utils;
-import net.minecraft.network.chat.Component;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,35 +30,40 @@ public class STSAbility {
     CobbleSTS.config.getAbility().forEach((key, value) -> {
       buttons.add(GooeyButton.builder()
         .display(CobbleSTS.language.getItemAbility().getItemStack())
-        .title(AdventureTranslator.toNative(CobbleSTS.language.getColorhexItem() + CobbleSTS.language.getAbility().getOrDefault(key, key) + CobbleSTS.language.getColorSeparator() +
-          CobbleSTS.language.getSeparator() + CobbleSTS.language.getColorPrice() + value))
+        .with(DataComponentTypes.ITEM_NAME,
+          AdventureTranslator.toNative(CobbleSTS.language.getColorhexItem() + CobbleSTS.language.getAbility().getOrDefault(key, key) + CobbleSTS.language.getColorSeparator() +
+            CobbleSTS.language.getSeparator() + CobbleSTS.language.getColorPrice() + value))
         .build());
     });
 
+    ItemStack itemPrevious = CobbleSTS.language.getItempreviouspage().getItemStack();
     LinkedPageButton previus = LinkedPageButton.builder()
-      .display(CobbleSTS.language.getItempreviouspage().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItempreviouspage().getDisplayname()))
+      .display(itemPrevious)
       .linkType(LinkType.Previous)
       .build();
 
+    ItemStack itemNext = CobbleSTS.language.getItemnextpage().getItemStack();
     LinkedPageButton next = LinkedPageButton.builder()
-      .display(CobbleSTS.language.getItemnextpage().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemnextpage().getDisplayname()))
+      .display(itemNext)
       .linkType(LinkType.Next)
       .build();
 
+    ItemStack itemClose = CobbleSTS.language.getItemclose().getItemStack();
     GooeyButton close = GooeyButton.builder()
-      .display(CobbleSTS.language.getItemclose().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemclose().getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getItemclose().getLore()))
+      .display(itemClose)
       .onClick((action) -> {
         UIManager.openUIForcefully(action.getPlayer(), STSInfo.open());
       })
       .build();
 
     PlaceholderButton placeholder = new PlaceholderButton();
+    ItemStack itemFill = Utils.parseItemId(CobbleSTS.language.getFill());
+    itemFill.set(DataComponentTypes.ITEM_NAME, Text.of(""));
     GooeyButton fill =
-      GooeyButton.builder().display(Utils.parseItemId(CobbleSTS.language.getFill()).setHoverName(Component.literal(""))).build();
+      GooeyButton
+        .builder()
+        .display(itemFill)
+        .build();
     template.fill(fill)
       .rectangle(0, 0, 5, 9, placeholder)
       .fillFromList(buttons)

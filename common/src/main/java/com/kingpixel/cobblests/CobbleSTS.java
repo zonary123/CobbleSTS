@@ -7,7 +7,7 @@ import com.kingpixel.cobblests.Config.Lang;
 import com.kingpixel.cobblests.command.CommandTree;
 import com.kingpixel.cobblests.manager.STSManager;
 import com.kingpixel.cobblests.utils.STSUtil;
-import com.kingpixel.cobbleutils.util.AdventureTranslator;
+import com.kingpixel.cobbleutils.util.PlayerUtils;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
@@ -54,7 +54,7 @@ public class CobbleSTS {
     CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> CommandTree.register(dispatcher));
     LifecycleEvent.SERVER_STARTED.register(server -> load());
     PlayerEvent.PLAYER_JOIN.register(player -> manager.addPlayer(player));
-    LifecycleEvent.SERVER_LEVEL_LOAD.register(level -> server = level.getLevel().getServer());
+    LifecycleEvent.SERVER_LEVEL_LOAD.register(level -> server = level.getServer());
     LifecycleEvent.SERVER_STOPPING.register((server) -> {
       tasks.forEach(task -> task.cancel(true));
       tasks.clear();
@@ -94,10 +94,12 @@ public class CobbleSTS {
 
     ScheduledFuture<?> broadcastTask = scheduler.scheduleAtFixedRate(() -> {
       if (server != null) {
-        server.getPlayerList().getPlayers().forEach(player -> {
-          if (manager.hasCooldownEnded(player) && !manager.getUserInfo().get(player.getUUID()).isMessagesend()) {
-            manager.getUserInfo().get(player.getUUID()).setMessagesend(true);
-            player.sendSystemMessage(AdventureTranslator.toNative(language.getReadytosell()));
+        server.getPlayerManager().getPlayerList().forEach(player -> {
+          if (manager.hasCooldownEnded(player) && !manager.getUserInfo().get(player.getUuid()).isMessagesend()) {
+            manager.getUserInfo().get(player.getUuid()).setMessagesend(true);
+            PlayerUtils.sendMessage(player,
+              language.getReadytosell(),
+              CobbleSTS.language.getPrefix());
           }
         });
       }

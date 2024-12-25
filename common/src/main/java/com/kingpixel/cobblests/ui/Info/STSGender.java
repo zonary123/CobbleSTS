@@ -10,7 +10,8 @@ import ca.landonjw.gooeylibs2.api.template.types.ChestTemplate;
 import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import com.kingpixel.cobbleutils.util.Utils;
-import net.minecraft.network.chat.Component;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,23 +27,23 @@ public class STSGender {
     CobbleSTS.config.getGender().forEach((key, value) -> {
       buttons.add(GooeyButton.builder()
         .display(CobbleSTS.language.getItemGender().getItemStack())
-        .title(AdventureTranslator.toNative(CobbleSTS.language.getColorhexItem() + CobbleSTS.language.getGender().getOrDefault(key, key) + CobbleSTS.language.getColorSeparator() +
-          CobbleSTS.language.getSeparator() + CobbleSTS.language.getColorPrice() + value))
+        .with(DataComponentTypes.ITEM_NAME,
+          AdventureTranslator.toNative(CobbleSTS.language.getColorhexItem() + CobbleSTS.language.getGender().getOrDefault(key, key) + CobbleSTS.language.getColorSeparator() +
+            CobbleSTS.language.getSeparator() + CobbleSTS.language.getColorPrice() + value))
         .build());
     });
 
     GooeyButton close = GooeyButton.builder()
       .display(CobbleSTS.language.getItemclose().getItemStack())
-      .title(AdventureTranslator.toNative(CobbleSTS.language.getItemclose().getDisplayname()))
-      .lore(Component.class, AdventureTranslator.toNativeL(CobbleSTS.language.getItemclose().getLore()))
       .onClick((action) -> {
         UIManager.openUIForcefully(action.getPlayer(), STSInfo.open());
       })
       .build();
 
     PlaceholderButton placeholder = new PlaceholderButton();
+    ItemStack itemFill = Utils.parseItemId(CobbleSTS.language.getFill());
     GooeyButton fill =
-      GooeyButton.builder().display(Utils.parseItemId(CobbleSTS.language.getFill()).setHoverName(Component.literal(""))).build();
+      GooeyButton.builder().display(itemFill).build();
     template.fill(fill)
       .rectangle(0, 0, 1, 9, placeholder)
       .fillFromList(buttons)
