@@ -65,11 +65,12 @@ public class CommandTree {
         })));
 
     // /sts pc
-    dispatcher.register(base.then(CommandManager.literal("pc")
-        .requires(source -> PermissionApi.hasPermission(
-          source, "cobblests.user", 2
-        ))
-        .executes(new CommandSTSPC())
+    dispatcher.register(base.then(
+        CommandManager.literal("pc")
+          .requires(source -> PermissionApi.hasPermission(
+            source, "cobblests.user", 2
+          ))
+          .executes(new CommandSTSPC())
       )
     );
   }

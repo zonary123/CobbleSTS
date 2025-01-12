@@ -2,10 +2,12 @@ package com.kingpixel.cobblests.Config;
 
 import com.google.gson.Gson;
 import com.kingpixel.cobblests.CobbleSTS;
+import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.util.Utils;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -45,7 +47,6 @@ public class Config {
   private BigDecimal defaultnature;
   private BigDecimal defaultability;
   private BigDecimal defaultball;
-  private List<String> islegends;
   private List<String> blacklisted;
   private Map<String, BigDecimal> gender;
   private Map<String, BigDecimal> form;
@@ -54,27 +55,15 @@ public class Config {
   private Map<String, BigDecimal> ball;
   private Map<String, BigDecimal> label;
   private Map<String, BigDecimal> pokemon;
+  private Map<String, BigDecimal> rarity;
 
   public Config() {
     debug = false;
     releasePokemon = false;
     notifyReady = true;
-    priceFormula = "base + (level * 1) + priceShiny + (totalIvs * 1) + (averageIvs * 1) + (totalEvs " +
-      "* 1) + " +
-      "(averageEvs * 1)" +
-      " + label + " +
-      "(happiness * 1) " +
-      "+ gender + form + " +
-      "nature + " +
-      "ability + ball" +
-      " + (((catchRate / 100) * level" +
-      " + log" +
-      "(totalIvs)" +
-      "/2 + " +
-      "sqrt" +
-      "(totalEvs) - 1) * " +
-      "shinyMultiplier * " +
-      "legendaryMultiplier * mythicalMultiplier * ultraBeastMultiplier)";
+    priceFormula = "base + (level * 10) + (totalIvs * 2) + (totalEvs * 1.5) + (happiness * 0.5) + " +
+      "(form * 10) + (nature * 8) + (ability * 12) + (ball * 7) + " +
+      "(((catchRate / 100) * level + log(totalIvs + 1) + sqrt(totalEvs + 1)) * shinyMultiplier)";
     decimals = 0;
     lostPriceForRelease = BigDecimal.valueOf(25);
     lang = "en";
@@ -105,7 +94,6 @@ public class Config {
     MythicalMultiplier = 1.0;
     UltraBeastMultiplier = 1.0;
     blacklisted = List.of("Magikarp");
-    islegends = List.of("Magikarp");
     gender = Map.of("M", BigDecimal.ZERO, "F", BigDecimal.ZERO, "N", BigDecimal.ZERO);
     form = Map.of("Galar", BigDecimal.ZERO);
     nature = Map.of("Hardy", BigDecimal.ZERO);
@@ -113,6 +101,8 @@ public class Config {
     ball = Map.of("poke_ball", BigDecimal.ZERO);
     pokemon = Map.of("Magikarp", BigDecimal.valueOf(0));
     label = Map.of("gen1", BigDecimal.ZERO);
+    rarity = new HashMap<>();
+    CobbleUtils.config.getRarity().forEach((key, value) -> rarity.put(key, BigDecimal.ZERO));
   }
 
 
@@ -120,47 +110,9 @@ public class Config {
     CompletableFuture<Boolean> futureRead = Utils.readFileAsync(CobbleSTS.path, "config.json",
       el -> {
         Gson gson = Utils.newGson();
-        Config config = gson.fromJson(el, Config.class);
-        debug = config.isDebug();
-        islegends = config.getIslegends();
-        lang = config.getLang();
-        guiinforows = config.getGuiinforows();
-        havecooldown = config.isHavecooldown();
-        cooldown = config.getCooldown();
-        cooldowns = config.getCooldowns();
-        allowshiny = config.isAllowshiny();
-        decimals = config.getDecimals();
-        blacklisted = config.getBlacklisted();
-        allowlegendary = config.isAllowlegendary();
-        notifyReady = config.isNotifyReady();
-        base = config.getBase();
-        priceFormula = config.getPriceFormula();
-        shiny = config.getShiny();
-        legendary = config.getLegendary();
-        defaultgender = config.getDefaultgender();
-        defaultform = config.getDefaultform();
-        defaultnature = config.getDefaultnature();
-        defaultability = config.getDefaultability();
-        defaultball = config.getDefaultball();
-        gender = config.getGender();
-        form = config.getForm();
-        nature = config.getNature();
-        ability = config.getAbility();
-        ball = config.getBall();
-        pokemon = config.getPokemon();
-        currency = config.getCurrency();
-        hiperinfo = config.isHiperinfo();
-        releasePokemon = config.isReleasePokemon();
-        limitPrice = config.getLimitPrice();
-        lostPriceForRelease = config.getLostPriceForRelease();
-        shinyMultiplier = config.getShinyMultiplier();
-        legendaryMultiplier = config.getLegendaryMultiplier();
-        MythicalMultiplier = config.getMythicalMultiplier();
-        UltraBeastMultiplier = config.getUltraBeastMultiplier();
-        label = config.getLabel();
-        ah = config.getAh();
+        CobbleSTS.config = gson.fromJson(el, Config.class);
 
-        String data = gson.toJson(this);
+        String data = gson.toJson(CobbleSTS.config);
         CompletableFuture<Boolean> futureWrite = Utils.writeFileAsync(CobbleSTS.path, "config.json",
           data);
         if (!futureWrite.join()) {

@@ -15,6 +15,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.kingpixel.cobblests.CobbleSTS.LOGGER;
+
 /**
  * @author Carlos Varas Alonso - 26/05/2024 4:23
  */
@@ -30,95 +32,125 @@ public class STSUtil {
   }
 
   public static BigDecimal Sell(Pokemon pokemon, boolean execute, ServerPlayerEntity player, boolean release) {
-    boolean isBan = CobbleSTS.config.getBlacklisted().contains(pokemon.showdownId())
-      || (pokemon.getShiny() && !CobbleSTS.config.isAllowshiny())
-      || ((pokemon.isLegendary() || CobbleSTS.config.getIslegends().contains(pokemon.showdownId())) && !CobbleSTS.config.isAllowlegendary());
+    boolean isBan =
+      CobbleSTS.config.getBlacklisted().contains(pokemon.showdownId()) || (pokemon.getShiny() && !CobbleSTS.config.isAllowshiny()) || (!CobbleSTS.config.isAllowlegendary() && pokemon.isLegendary());
     if (isBan) return BigDecimal.ZERO;
 
-    double base = CobbleSTS.config.getPokemon().getOrDefault(pokemon.showdownId(), CobbleSTS.config.getBase()).doubleValue();
-    double shiny = pokemon.getShiny() ? CobbleSTS.config.getShiny().doubleValue() : 0;
-    double label = 0;
+    BigDecimal base = CobbleSTS.config.getPokemon().getOrDefault(pokemon.showdownId(), CobbleSTS.config.getBase());
+    BigDecimal shiny = pokemon.getShiny() ? CobbleSTS.config.getShiny() : BigDecimal.ZERO;
+    BigDecimal legendary = pokemon.isLegendary() ? CobbleSTS.config.getLegendary() : BigDecimal.ZERO;
+    BigDecimal label = BigDecimal.ZERO;
     for (String s : pokemon.getForm().getLabels()) {
-      label += CobbleSTS.config.getLabel().getOrDefault(s, BigDecimal.ZERO).doubleValue();
+      label = label.add(CobbleSTS.config.getLabel().getOrDefault(s, BigDecimal.ZERO));
     }
-    double happiness = pokemon.getFriendship();
-    double gender = CobbleSTS.config.getGender()
-      .getOrDefault(pokemon.getGender().getShowdownName(), CobbleSTS.config.getDefaultability()).doubleValue();
-    double form = CobbleSTS.config.getForm()
-      .getOrDefault(pokemon.getForm().getName(), CobbleSTS.config.getDefaultform()).doubleValue();
-    double nature = CobbleSTS.config.getNature()
-      .getOrDefault(pokemon.getNature().getName().getNamespace(), CobbleSTS.config.getDefaultnature()).doubleValue();
-    double ability = PokemonUtils.isAH(pokemon) ? CobbleSTS.config.getAh().doubleValue() : CobbleSTS.config.getAbility()
-      .getOrDefault(pokemon.getAbility().getName(), CobbleSTS.config.getDefaultability()).doubleValue();
-    double ball = CobbleSTS.config.getBall()
-      .getOrDefault(pokemon.getCaughtBall().getName().getPath(), CobbleSTS.config.getDefaultball()).doubleValue();
-    double catchRate = pokemon.getForm().getCatchRate();
-    double level = pokemon.getLevel();
-    double totalIVs = PokemonUtils.getIvsTotal(pokemon.getIvs());
-    double totalEVs = PokemonUtils.getEvsTotal(pokemon.getEvs());
-    double averageIVs = PokemonUtils.getIvsAverage(pokemon.getIvs());
-    double averageEVs = PokemonUtils.getEvsAverage(pokemon.getEvs());
-    double shinyMultiplier = pokemon.getShiny() ? CobbleSTS.config.getShinyMultiplier() : 1.0;
-    double legendaryMultiplier = pokemon.isLegendary() ? CobbleSTS.config.getLegendaryMultiplier() : 1.0;
-    double mythicalMultiplier = pokemon.isMythical() ? CobbleSTS.config.getMythicalMultiplier() : 1.0;
-    double ultraBeastMultiplier = pokemon.isUltraBeast() ? CobbleSTS.config.getUltraBeastMultiplier() : 1.0;
-
-
+    BigDecimal happiness = BigDecimal.valueOf(pokemon.getFriendship());
+    BigDecimal gender = CobbleSTS.config.getGender()
+      .getOrDefault(pokemon.getGender().getShowdownName(), CobbleSTS.config.getDefaultability());
+    BigDecimal form = CobbleSTS.config.getForm()
+      .getOrDefault(pokemon.getForm().getName(), CobbleSTS.config.getDefaultform());
+    BigDecimal nature = CobbleSTS.config.getNature()
+      .getOrDefault(pokemon.getNature().getName().getNamespace(), CobbleSTS.config.getDefaultnature());
+    BigDecimal ability = PokemonUtils.isAH(pokemon) ? CobbleSTS.config.getAh() : CobbleSTS.config.getAbility()
+      .getOrDefault(pokemon.getAbility().getName(), CobbleSTS.config.getDefaultability());
+    BigDecimal ball = CobbleSTS.config.getBall()
+      .getOrDefault(pokemon.getCaughtBall().getName().getPath(), CobbleSTS.config.getDefaultball());
+    BigDecimal catchRate = BigDecimal.valueOf(pokemon.getForm().getCatchRate());
+    BigDecimal level = BigDecimal.valueOf(pokemon.getLevel());
+    BigDecimal totalIVs = BigDecimal.valueOf(PokemonUtils.getIvsTotal(pokemon.getIvs()));
+    BigDecimal totalEVs = BigDecimal.valueOf(PokemonUtils.getEvsTotal(pokemon.getEvs()));
+    BigDecimal averageIVs = BigDecimal.valueOf(PokemonUtils.getIvsAverage(pokemon.getIvs()));
+    BigDecimal averageEVs = BigDecimal.valueOf(PokemonUtils.getEvsAverage(pokemon.getEvs()));
+    BigDecimal shinyMultiplier = pokemon.getShiny() ? BigDecimal.valueOf(CobbleSTS.config.getShinyMultiplier()) : BigDecimal.ONE;
+    BigDecimal legendaryMultiplier = pokemon.isLegendary() ? BigDecimal.valueOf(CobbleSTS.config.getLegendaryMultiplier()) : BigDecimal.ONE;
+    BigDecimal mythicalMultiplier = pokemon.isMythical() ? BigDecimal.valueOf(CobbleSTS.config.getMythicalMultiplier()) : BigDecimal.ONE;
+    BigDecimal ultraBeastMultiplier = pokemon.isUltraBeast() ? BigDecimal.valueOf(CobbleSTS.config.getUltraBeastMultiplier()) : BigDecimal.ONE;
+    BigDecimal rarityMultiplier = CobbleSTS.config.getRarity().getOrDefault(PokemonUtils.getRarityS(pokemon),
+      BigDecimal.ONE);
     String formula = CobbleSTS.config.getPriceFormula();
-    formula = formula.replace("base", String.valueOf(base))
-      .replace("priceShiny", String.valueOf(shiny))
-      .replace("happiness", String.valueOf(happiness))
-      .replace("gender", String.valueOf(gender))
-      .replace("form", String.valueOf(form))
-      .replace("nature", String.valueOf(nature))
-      .replace("ability", String.valueOf(ability))
-      .replace("ball", String.valueOf(ball))
-      .replace("catchRate", String.valueOf(catchRate))
-      .replace("level", String.valueOf(level))
-      .replace("totalIvs", String.valueOf(totalIVs))
-      .replace("totalEvs", String.valueOf(totalEVs))
-      .replace("shinyMultiplier", String.valueOf(shinyMultiplier))
-      .replace("legendaryMultiplier", String.valueOf(legendaryMultiplier))
-      .replace("mythicalMultiplier", String.valueOf(mythicalMultiplier))
-      .replace("ultraBeastMultiplier", String.valueOf(ultraBeastMultiplier))
-      .replace("averageIvs", String.valueOf(averageIVs))
-      .replace("averageEvs", String.valueOf(averageEVs))
-      .replace("label", String.valueOf(label));
+    try {
 
-    Expression expression = new ExpressionBuilder(formula)
-      .build();
-    BigDecimal price = BigDecimal.valueOf(expression.evaluate()).setScale(2, BigDecimal.ROUND_HALF_UP);
+      Expression expression = new ExpressionBuilder(formula)
+        .variable("base")
+        .variable("basePrice")
+        .variable("priceShiny")
+        .variable("priceLegendary")
+        .variable("happiness")
+        .variable("gender")
+        .variable("form")
+        .variable("label")
+        .variable("nature")
+        .variable("ability")
+        .variable("averageIvs")
+        .variable("averageEvs")
+        .variable("ball")
+        .variable("catchRate")
+        .variable("level")
+        .variable("totalIvs")
+        .variable("totalEvs")
+        .variable("shinyMultiplier")
+        .variable("legendaryMultiplier")
+        .variable("mythicalMultiplier")
+        .variable("ultraBeastMultiplier")
+        .variable("rarityMultiplier")
+        .build()
+        .setVariable("base", base.doubleValue())
+        .setVariable("basePrice", base.doubleValue())
+        .setVariable("priceShiny", shiny.doubleValue())
+        .setVariable("priceLegendary", legendary.doubleValue())
+        .setVariable("happiness", happiness.doubleValue())
+        .setVariable("gender", gender.doubleValue())
+        .setVariable("form", form.doubleValue())
+        .setVariable("nature", nature.doubleValue())
+        .setVariable("rarityMultiplier", 1)
+        .setVariable("ability", ability.doubleValue())
+        .setVariable("ball", ball.doubleValue())
+        .setVariable("catchRate", catchRate.doubleValue())
+        .setVariable("level", level.doubleValue())
+        .setVariable("totalIvs", totalIVs.doubleValue())
+        .setVariable("totalEvs", totalEVs.doubleValue())
+        .setVariable("averageIvs", averageIVs.doubleValue())
+        .setVariable("averageEvs", averageEVs.doubleValue())
+        .setVariable("label", label.doubleValue())
+        .setVariable("shinyMultiplier", shinyMultiplier.doubleValue())
+        .setVariable("legendaryMultiplier", legendaryMultiplier.doubleValue())
+        .setVariable("mythicalMultiplier", mythicalMultiplier.doubleValue())
+        .setVariable("ultraBeastMultiplier", ultraBeastMultiplier.doubleValue());
 
 
-    if (price.compareTo(CobbleSTS.config.getLimitPrice()) > 0) price = CobbleSTS.config.getLimitPrice();
+      BigDecimal price = BigDecimal.valueOf(expression.evaluate()).setScale(2, BigDecimal.ROUND_HALF_UP);
 
-    if (price.compareTo(BigDecimal.ZERO) <= 0) return BigDecimal.ZERO;
+      if (price.compareTo(CobbleSTS.config.getLimitPrice()) > 0) price = CobbleSTS.config.getLimitPrice();
+      if (price.compareTo(BigDecimal.ZERO) <= 0) return BigDecimal.ZERO;
 
-    if (execute) {
-      PlayerPartyStore partyStorageSlot = Cobblemon.INSTANCE.getStorage().getParty(player);
+      if (execute) {
+        PlayerPartyStore partyStorageSlot = Cobblemon.INSTANCE.getStorage().getParty(player);
 
-      CobbleSTS.manager.addPlayerWithDate(player, PlayerUtils.getCooldown(CobbleSTS.config.getCooldowns(),
-        CobbleSTS.config.getCooldown(), player
-      ));
+        CobbleSTS.manager.addPlayerWithDate(player, PlayerUtils.getCooldown(CobbleSTS.config.getCooldowns(),
+          CobbleSTS.config.getCooldown(), player
+        ));
 
-      if (release) {
-        BigDecimal lostAmount = price.multiply(CobbleSTS.config.getLostPriceForRelease());
-        price = price.subtract(lostAmount);
+        if (release) {
+          BigDecimal lostAmount = price.multiply(CobbleSTS.config.getLostPriceForRelease());
+          price = price.subtract(lostAmount);
+        }
+
+        EconomyUtil.addMoney(player, CobbleSTS.config.getCurrency(), price);
+        if (!partyStorageSlot.remove(pokemon)) {
+          Cobblemon.INSTANCE.getStorage().getPC(player).remove(pokemon);
+        }
+        PlayerUtils.sendMessage(player, CobbleSTS.language.getSell()
+          .replace("%player%", player.getGameProfile().getName())
+          .replace("%pokemon%", pokemon.getSpecies().getName())
+          .replace("%price%", price.toString()), CobbleSTS.language.getPrefix());
+      } else {
+        return price;
       }
 
-      EconomyUtil.addMoney(player, CobbleSTS.config.getCurrency(), price);
-      if (!partyStorageSlot.remove(pokemon)) {
-        Cobblemon.INSTANCE.getStorage().getPC(player).remove(pokemon);
-      }
-      PlayerUtils.sendMessage(player, CobbleSTS.language.getSell()
-        .replace("%player%", player.getGameProfile().getName())
-        .replace("%pokemon%", pokemon.getSpecies().getName())
-        .replace("%price%", price.toString()), CobbleSTS.language.getPrefix());
-    } else {
       return price;
+    } catch (Exception e) {
+      LOGGER.error("Error evaluating formula: " + formula);
+      e.printStackTrace();
+      return BigDecimal.ZERO;
     }
-
-    return price;
   }
-
 }

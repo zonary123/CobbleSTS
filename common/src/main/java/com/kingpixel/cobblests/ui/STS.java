@@ -120,7 +120,7 @@ public class STS {
           .with(DataComponentTypes.ITEM_NAME, AdventureTranslator.toNative(CobbleSTS.language.getItemNotAllowShiny().getDisplayname()))
           .with(DataComponentTypes.LORE, new LoreComponent(AdventureTranslator.toNativeL(CobbleSTS.language.getItemNotAllowShiny().getLore())))
           .build();
-      } else if ((pokemon.isLegendary() || CobbleSTS.config.getIslegends().contains(pokemon.getSpecies().getName())) && !CobbleSTS.config.isAllowlegendary()) {
+      } else if (pokemon.isLegendary() && !CobbleSTS.config.isAllowlegendary()) {
         button = GooeyButton.builder()
           .display(CobbleSTS.language.getItemNotAllowLegendary().getItemStack())
           .with(DataComponentTypes.ITEM_NAME, AdventureTranslator.toNative(CobbleSTS.language.getItemNotAllowLegendary().getDisplayname()))
