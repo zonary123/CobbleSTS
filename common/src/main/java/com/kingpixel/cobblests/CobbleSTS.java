@@ -1,5 +1,6 @@
 package com.kingpixel.cobblests;
 
+import ca.landonjw.gooeylibs2.api.tasks.Task;
 import com.cobblemon.mod.common.api.Priority;
 import com.cobblemon.mod.common.api.events.CobblemonEvents;
 import com.kingpixel.cobblests.Config.Config;
@@ -16,13 +17,6 @@ import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
 /**
  * @author Carlos Varas Alonso - 28/04/2024 23:50
  */
@@ -35,8 +29,7 @@ public class CobbleSTS {
   public static MinecraftServer server;
   public static Config config = new Config();
   public static STSManager manager = new STSManager();
-  private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-  private static final List<ScheduledFuture<?>> tasks = new ArrayList<>();
+  private static Task broadcastTask;
 
   public static void init() {
     LOGGER.info("Initializing " + MOD_NAME);
@@ -56,16 +49,6 @@ public class CobbleSTS {
     PlayerEvent.PLAYER_JOIN.register(player -> manager.addPlayer(player));
     LifecycleEvent.SERVER_LEVEL_LOAD.register(level -> server = level.getServer());
     LifecycleEvent.SERVER_STOPPING.register((server) -> {
-      tasks.forEach(task -> task.cancel(true));
-      tasks.clear();
-      scheduler.shutdown();
-      try {
-        if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
-          scheduler.shutdownNow();
-        }
-      } catch (InterruptedException ex) {
-        scheduler.shutdownNow();
-      }
       LOGGER.info("Stopping " + MOD_NAME);
     });
 
@@ -85,25 +68,23 @@ public class CobbleSTS {
 
   private static void tasks() {
     if (!config.isNotifyReady()) return;
-    for (ScheduledFuture<?> task : tasks) {
-      if (task != null && !task.isCancelled()) {
-        task.cancel(false);
-      }
-    }
-    tasks.clear();
 
-    ScheduledFuture<?> broadcastTask = scheduler.scheduleAtFixedRate(() -> {
-      if (server != null) {
-        server.getPlayerManager().getPlayerList().forEach(player -> {
-          if (manager.hasCooldownEnded(player) && !manager.getUserInfo().get(player.getUuid()).isMessagesend()) {
-            manager.getUserInfo().get(player.getUuid()).setMessagesend(true);
-            PlayerUtils.sendMessage(player,
-              language.getReadytosell(),
-              CobbleSTS.language.getPrefix());
-          }
-        });
-      }
-    }, 0, 1, TimeUnit.MINUTES);
-    tasks.add(broadcastTask);
+    if (broadcastTask != null) broadcastTask.setExpired();
+
+    broadcastTask = Task.builder()
+      .execute(() -> {
+        if (server != null) {
+          server.getPlayerManager().getPlayerList().forEach(player -> {
+            if (manager.hasCooldownEnded(player) && !manager.getUserInfo().get(player.getUuid()).isMessagesend()) {
+              manager.getUserInfo().get(player.getUuid()).setMessagesend(true);
+              PlayerUtils.sendMessage(player,
+                language.getReadytosell(),
+                CobbleSTS.language.getPrefix());
+            }
+          });
+        }
+      })
+      .interval(20L * 60L)
+      .build();
   }
 }

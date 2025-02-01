@@ -93,13 +93,13 @@ public class Config {
     legendaryMultiplier = 1.0;
     MythicalMultiplier = 1.0;
     UltraBeastMultiplier = 1.0;
-    blacklisted = List.of("Magikarp");
+    blacklisted = List.of("magikarp");
     gender = Map.of("M", BigDecimal.ZERO, "F", BigDecimal.ZERO, "N", BigDecimal.ZERO);
-    form = Map.of("Galar", BigDecimal.ZERO);
-    nature = Map.of("Hardy", BigDecimal.ZERO);
-    ability = Map.of("None", BigDecimal.ZERO);
+    form = Map.of("galar", BigDecimal.ZERO);
+    nature = Map.of("hardy", BigDecimal.ZERO);
+    ability = Map.of("none", BigDecimal.ZERO);
     ball = Map.of("poke_ball", BigDecimal.ZERO);
-    pokemon = Map.of("Magikarp", BigDecimal.valueOf(0));
+    pokemon = Map.of("magikarp", BigDecimal.valueOf(0));
     label = Map.of("gen1", BigDecimal.ZERO);
     rarity = new HashMap<>();
     CobbleUtils.config.getRarity().forEach((key, value) -> rarity.put(key, BigDecimal.ZERO));
