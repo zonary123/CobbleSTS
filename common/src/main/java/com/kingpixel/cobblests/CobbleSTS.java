@@ -9,6 +9,7 @@ import com.kingpixel.cobblests.command.CommandTree;
 import com.kingpixel.cobblests.database.DataBaseFactory;
 import com.kingpixel.cobblests.model.UserInfo;
 import com.kingpixel.cobblests.utils.STSUtil;
+import com.kingpixel.cobbleutils.Model.PokemonFormula;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
 import com.kingpixel.cobbleutils.util.TypeMessage;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
@@ -35,6 +36,7 @@ public class CobbleSTS {
   }
 
   public static void load() {
+    PokemonFormula.removeFormula(MOD_ID);
     files();
     tasks();
     new DataBaseFactory(config.getDatabase());
