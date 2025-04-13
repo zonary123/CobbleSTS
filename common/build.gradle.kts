@@ -16,7 +16,7 @@ dependencies {
     modImplementation("dev.architectury:architectury:${property("architectury_version")}")
     modImplementation("ca.landonjw.gooeylibs:fabric-api-repack:${property("gooeylibs_version")}")
 
-    modImplementation(files("libs/CobbleUtils-common-1.1.3.jar"))
+    modImplementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
     // Database
     api("org.mongodb:mongodb-driver-sync:${property("mongodb_version")}")

@@ -1,9 +1,14 @@
 package com.kingpixel.cobblests.command;
 
+import ca.landonjw.gooeylibs2.api.UIManager;
+import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
+import com.kingpixel.cobblests.utils.STSUtil;
+import com.kingpixel.cobbleutils.api.EconomyApi;
 import com.kingpixel.cobbleutils.api.PermissionApi;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
+import com.kingpixel.cobbleutils.util.TypeMessage;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.argument.EntityArgumentType;
@@ -26,7 +31,12 @@ public class CommandTree {
       ));
     // /sts
     dispatcher.register(
-      base.executes(new CommandSTS())
+      base.executes(context -> {
+        ServerPlayerEntity player = context.getSource().getPlayer();
+        if (player == null) return 0;
+        open(player);
+        return 1;
+      })
     );
 
     // /sts other <player>
@@ -37,8 +47,14 @@ public class CommandTree {
             source, "cobblests.other", 2
           ))
           .then(
-            CommandManager.argument("player", EntityArgumentType.player())
-              .executes(new CommandSTSOther())
+            CommandManager.argument("player", EntityArgumentType.players())
+              .executes(context -> {
+                var players = EntityArgumentType.getPlayers(context, "player");
+                for (ServerPlayerEntity player : players) {
+                  open(player);
+                }
+                return 1;
+              })
           ))
     );
 
@@ -56,7 +72,8 @@ public class CommandTree {
             PlayerUtils.sendMessage(
               player,
               message,
-              CobbleSTS.language.getPrefix());
+              CobbleSTS.language.getPrefix(),
+              TypeMessage.CHAT);
           } else {
             context.getSource().sendMessage(AdventureTranslator.toNative(
               message));
@@ -64,14 +81,27 @@ public class CommandTree {
           return 1;
         })));
 
-    // /sts pc
-    dispatcher.register(base.then(
-        CommandManager.literal("pc")
-          .requires(source -> PermissionApi.hasPermission(
-            source, "cobblests.user", 2
-          ))
-          .executes(new CommandSTSPC())
-      )
+  }
+
+  private static void open(ServerPlayerEntity player) {
+    if (player == null) return;
+    CobbleSTS.language.getPartyPcMenu().openParty(
+      player,
+      template -> {
+
+      },
+      pokemonAction -> {
+        Pokemon pokemon = pokemonAction.getPokemon();
+        ServerPlayerEntity player1 = pokemonAction.getAction().getPlayer();
+        STSUtil.Sell(pokemon, player1, STSUtil.STSAction.SELL);
+        UIManager.closeUI(player1);
+      },
+      close -> UIManager.closeUI(close.getPlayer()),
+      CobbleSTS.config.getBlacklist(),
+      CobbleSTS.language.getPokemonLore(),
+      (pokemon, lore) -> lore.replaceAll(s -> s.replace("%price%", EconomyApi.formatMoney(STSUtil.getPrice(pokemon),
+        CobbleSTS.config.getEconomyUse()))),
+      CobbleSTS.language.getConfirmMenu()
     );
   }
 }
