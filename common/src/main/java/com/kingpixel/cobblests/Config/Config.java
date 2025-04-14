@@ -26,6 +26,7 @@ public class Config {
   private DataBaseConfig database;
   private boolean releasePokemon;
   private boolean notifyReady;
+  private BigDecimal limitPrice;
   private BigDecimal lostPriceForRelease;
   private EconomyUse economyUse;
   private int alertCooldown;
@@ -39,6 +40,7 @@ public class Config {
     database = new DataBaseConfig(CobbleSTS.MOD_ID);
     releasePokemon = false;
     notifyReady = true;
+    limitPrice = BigDecimal.valueOf(100000);
     economyUse = new EconomyUse(ImpactorEconomy.IDENTIFY, "");
     lostPriceForRelease = BigDecimal.valueOf(25);
     lang = "en";

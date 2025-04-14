@@ -3,6 +3,7 @@ package com.kingpixel.cobblests.command;
 import ca.landonjw.gooeylibs2.api.UIManager;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
+import com.kingpixel.cobblests.database.DataBaseFactory;
 import com.kingpixel.cobblests.utils.STSUtil;
 import com.kingpixel.cobbleutils.api.EconomyApi;
 import com.kingpixel.cobbleutils.api.PermissionApi;
@@ -56,6 +57,36 @@ public class CommandTree {
                 return 1;
               })
           ))
+    );
+
+    dispatcher.register(
+      base
+        .then(CommandManager.literal("reset")
+          .requires(source -> PermissionApi.hasPermission(
+            source, "cobblests.reset", 2
+          ))
+          .executes(context -> {
+            if (context.getSource().isExecutedByPlayer()) {
+              var player = context.getSource().getPlayer();
+              var userinfo = DataBaseFactory.INSTANCE.getUserInfo(player);
+              userinfo.setCooldown(0);
+              DataBaseFactory.INSTANCE.updateUserInfo(userinfo);
+            }
+            return 0;
+          })
+          .then(
+            CommandManager.argument("player", EntityArgumentType.players())
+              .executes(context -> {
+                var players = EntityArgumentType.getPlayers(context, "player");
+                for (ServerPlayerEntity player : players) {
+                  var userinfo = DataBaseFactory.INSTANCE.getUserInfo(player);
+                  userinfo.setCooldown(0);
+                  DataBaseFactory.INSTANCE.updateUserInfo(userinfo);
+                }
+                return 1;
+              })
+          )
+        )
     );
 
     // /sts reload

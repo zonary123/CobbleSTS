@@ -30,7 +30,7 @@ public class UserInfo {
 
   public boolean check(ServerPlayerEntity player) {
     boolean update = false;
-    
+
 
     // Actualizar en la base de datos si hubo cambios
     return update;
@@ -38,6 +38,10 @@ public class UserInfo {
 
   public boolean hasCooldown() {
     return System.currentTimeMillis() <= cooldown;
+  }
+
+  public void setCooldown(long cooldown) {
+    this.cooldown = cooldown;
   }
 
   public void setCooldown(ServerPlayerEntity player) {

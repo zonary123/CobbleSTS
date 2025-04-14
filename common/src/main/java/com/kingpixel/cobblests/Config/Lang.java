@@ -21,6 +21,8 @@ public class Lang {
   private String reload;
   private String readytosell;
   private String cooldownMessage;
+  private String messageSell;
+  private String messagePriceIsZero;
   private List<String> pokemonLore;
   private PartyPcMenu partyPcMenu;
   private ConfirmMenu confirmMenu;
@@ -29,6 +31,8 @@ public class Lang {
     prefix = "<gradient:#27b3cf:#88d4e3>CobbleSTS <#EA814F>»";
     reload = "%prefix% <gradient:#27b3cf:#88d4e3>The plugin has been reloaded!";
     cooldownMessage = "%prefix% <gradient:#27b3cf:#88d4e3>You have to wait %time% before you can use this command again.";
+    messageSell = "%prefix% <gradient:#27b3cf:#88d4e3>You have sold the pokemon %pokemon% for %price%!";
+    messagePriceIsZero = "%prefix% <gradient:#27b3cf:#88d4e3>The price of the pokemon is 0, you can release it.";
     pokemonLore = new ArrayList<>(CobbleUtils.language.getLorepokemon());
     pokemonLore.add("&7Price: &e%price%");
     readytosell = "&aReady to sell in STS";

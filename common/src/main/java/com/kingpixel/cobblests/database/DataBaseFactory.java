@@ -2,7 +2,9 @@ package com.kingpixel.cobblests.database;
 
 import com.kingpixel.cobblests.model.UserInfo;
 import com.kingpixel.cobbleutils.Model.DataBaseConfig;
+import com.kingpixel.cobbleutils.Model.DataBaseType;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -21,7 +23,8 @@ public class DataBaseFactory {
       case MYSQL -> INSTANCE = new DataBaseMySQL(config);
       case SQLITE -> INSTANCE = new DataBaseSQLite(config);
       case MONGODB -> INSTANCE = new DataBaseMongoDB(config);
-      default -> throw new IllegalStateException("Unexpected value: " + config.getType());
+      default ->
+        throw new IllegalArgumentException("Invalid database type, Available types: " + Arrays.toString(DataBaseType.values()));
     }
     INSTANCE.connect();
   }
