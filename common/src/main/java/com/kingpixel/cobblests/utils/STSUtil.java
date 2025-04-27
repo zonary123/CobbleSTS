@@ -11,7 +11,6 @@ import com.kingpixel.cobbleutils.util.TypeMessage;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Date;
 
 /**
@@ -22,10 +21,16 @@ public class STSUtil {
     var userinfo = DataBaseFactory.INSTANCE.getUserInfo(player);
     BigDecimal price = getPrice(pokemon);
     if (stsAction == STSAction.RELEASE) {
-      // Calcular el 25% del precio original y restarlo
-      BigDecimal discount = price.multiply(CobbleSTS.config.getLostPriceForRelease().divide(BigDecimal.valueOf(100),
-        RoundingMode.UNNECESSARY));
-      price = price.subtract(discount);
+      BigDecimal lostPriceForRelease = CobbleSTS.config.getLostPriceForRelease();
+
+      if (lostPriceForRelease.compareTo(BigDecimal.ZERO) > 0) {
+        if (lostPriceForRelease.compareTo(BigDecimal.ZERO) < 0 || lostPriceForRelease.compareTo(BigDecimal.ONE) > 0) {
+          throw new IllegalArgumentException("The lost price for release must be between 0 and 1 (0% and 100%)");
+        }
+
+        BigDecimal discount = price.multiply(lostPriceForRelease);
+        price = price.subtract(discount);
+      }
     } else {
       if (userinfo.hasCooldown()) {
         PlayerUtils.sendMessage(
@@ -62,8 +67,10 @@ public class STSUtil {
       TypeMessage.CHAT
     );
     EconomyApi.addMoney(player.getUuid(), price, CobbleSTS.config.getEconomyUse());
-    userinfo.setCooldown(player);
-    DataBaseFactory.INSTANCE.updateUserInfo(userinfo);
+    if (stsAction == STSAction.SELL) {
+      userinfo.setCooldown(player);
+      DataBaseFactory.INSTANCE.updateUserInfo(userinfo);
+    }
   }
 
   public static BigDecimal getPrice(Pokemon pokemon) {
