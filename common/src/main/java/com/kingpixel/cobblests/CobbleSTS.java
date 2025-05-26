@@ -18,6 +18,9 @@ import dev.architectury.event.events.common.PlayerEvent;
 import kotlin.Unit;
 import net.minecraft.server.MinecraftServer;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author Carlos Varas Alonso - 28/04/2024 23:50
  */
@@ -84,25 +87,31 @@ public class CobbleSTS {
   }
 
   private static void tasks() {
-    if (!config.isNotifyReady() || config.getAlertCooldown() == 0) return;
+    if (!config.isNotifyReady() || config.getAlertCooldown() <= 0) return;
 
     if (broadcastTask != null) broadcastTask.setExpired();
     long cooldown = (20L * 60L) * config.getAlertCooldown();
     broadcastTask = Task.builder()
       .execute(() -> {
-        if (server != null) {
-          server.getPlayerManager().getPlayerList().forEach(player -> {
-            UserInfo userInfo = DataBaseFactory.INSTANCE.getUserInfo(player);
-            if (!userInfo.hasCooldown()) {
-              PlayerUtils.sendMessage(
-                player,
-                language.getReadytosell(),
-                language.getPrefix(),
-                TypeMessage.CHAT
-              );
+        CompletableFuture.runAsync(() -> {
+            var players = server.getPlayerManager().getPlayerList();
+            for (var player : players) {
+              UserInfo userInfo = DataBaseFactory.INSTANCE.getUserInfo(player);
+              if (!userInfo.hasCooldown()) {
+                PlayerUtils.sendMessage(
+                  player,
+                  language.getReadytosell(),
+                  language.getPrefix(),
+                  TypeMessage.CHAT
+                );
+              }
             }
+          })
+          .orTimeout(30, TimeUnit.SECONDS)
+          .exceptionally(e -> {
+            e.printStackTrace();
+            return null;
           });
-        }
       })
       .interval(cooldown)
       .infinite()

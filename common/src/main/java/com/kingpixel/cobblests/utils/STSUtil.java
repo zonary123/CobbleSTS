@@ -3,6 +3,7 @@ package com.kingpixel.cobblests.utils;
 import com.cobblemon.mod.common.Cobblemon;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
+import com.kingpixel.cobblests.command.CommandTree;
 import com.kingpixel.cobblests.database.DataBaseFactory;
 import com.kingpixel.cobbleutils.api.EconomyApi;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
@@ -18,6 +19,7 @@ import java.util.Date;
  */
 public class STSUtil {
   public static void Sell(Pokemon pokemon, ServerPlayerEntity player, STSAction stsAction) {
+    if (CommandTree.isBattleActive(player)) return;
     var userinfo = DataBaseFactory.INSTANCE.getUserInfo(player);
     BigDecimal price = getPrice(pokemon);
     if (stsAction == STSAction.RELEASE) {

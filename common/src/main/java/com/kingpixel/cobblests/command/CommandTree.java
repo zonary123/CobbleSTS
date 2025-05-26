@@ -1,6 +1,7 @@
 package com.kingpixel.cobblests.command;
 
 import ca.landonjw.gooeylibs2.api.UIManager;
+import com.cobblemon.mod.common.Cobblemon;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobblests.database.DataBaseFactory;
@@ -116,6 +117,7 @@ public class CommandTree {
 
   private static void open(ServerPlayerEntity player) {
     if (player == null) return;
+    if (isBattleActive(player)) return;
     CobbleSTS.language.getPartyPcMenu().openParty(
       player,
       template -> {
@@ -134,5 +136,18 @@ public class CommandTree {
         CobbleSTS.config.getEconomyUse()))),
       CobbleSTS.language.getConfirmMenu()
     );
+  }
+
+  public static boolean isBattleActive(ServerPlayerEntity player) {
+    boolean battleActive = Cobblemon.INSTANCE.getBattleRegistry().getBattleByParticipatingPlayer(player) != null;
+    if (battleActive) {
+      PlayerUtils.sendMessage(
+        player,
+        CobbleSTS.language.getMessageInBattle(),
+        CobbleSTS.language.getPrefix(),
+        TypeMessage.CHAT
+      );
+    }
+    return battleActive;
   }
 }

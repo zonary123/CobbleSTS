@@ -23,6 +23,7 @@ public class Lang {
   private String cooldownMessage;
   private String messageSell;
   private String messagePriceIsZero;
+  private String messageInBattle;
   private List<String> pokemonLore;
   private PartyPcMenu partyPcMenu;
   private ConfirmMenu confirmMenu;
@@ -36,6 +37,7 @@ public class Lang {
     pokemonLore = new ArrayList<>(CobbleUtils.language.getLorepokemon());
     pokemonLore.add("&7Price: &e%price%");
     readytosell = "&aReady to sell in STS";
+    messageInBattle = "%prefix% <gradient:#27b3cf:#88d4e3>You cannot sell a pokemon that is in battle.";
     partyPcMenu = new PartyPcMenu();
     confirmMenu = new ConfirmMenu();
   }
