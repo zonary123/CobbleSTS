@@ -27,8 +27,8 @@ public class DataBaseJSON extends DataBaseClient {
   }
 
   @Override public UserInfo getUserInfo(ServerPlayerEntity player) {
-    UserInfo data = DataBaseFactory.users.get(player.getUuid());
-    if (data != null) return data;
+    UserInfo userinfo = DataBaseFactory.users.get(player.getUuid());
+    if (userinfo != null) return userinfo;
 
     var future = Utils.readFileAsync(CobbleSTS.PATH_DATA, player.getUuidAsString() + ".json", call -> {
       UserInfo userInfo = Utils.newWithoutSpacingGson().fromJson(call, UserInfo.class);
@@ -38,12 +38,12 @@ public class DataBaseJSON extends DataBaseClient {
     });
 
     if (!future.join()) {
-      data = new UserInfo(player);
-      DataBaseFactory.users.put(player.getUuid(), data);
+      userinfo = new UserInfo(player);
+      DataBaseFactory.users.put(player.getUuid(), userinfo);
     } else {
-      data = DataBaseFactory.users.get(player.getUuid());
+      userinfo = DataBaseFactory.users.get(player.getUuid());
     }
-    return data;
+    return userinfo;
   }
 
   @Override public void updateUserInfo(UserInfo userInfo) {

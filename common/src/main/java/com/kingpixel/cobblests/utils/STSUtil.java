@@ -13,6 +13,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Carlos Varas Alonso - 12/04/2025 19:18
@@ -20,59 +21,65 @@ import java.util.Date;
 public class STSUtil {
   public static void Sell(Pokemon pokemon, ServerPlayerEntity player, STSAction stsAction) {
     if (CommandTree.isBattleActive(player)) return;
-    var userinfo = DataBaseFactory.INSTANCE.getUserInfo(player);
-    BigDecimal price = getPrice(pokemon);
-    if (stsAction == STSAction.RELEASE) {
-      BigDecimal lostPriceForRelease = CobbleSTS.config.getLostPriceForRelease();
+    CompletableFuture.runAsync(() -> {
+        var userinfo = DataBaseFactory.INSTANCE.getUserInfo(player);
+        BigDecimal price = getPrice(pokemon);
+        if (stsAction == STSAction.RELEASE) {
+          BigDecimal lostPriceForRelease = CobbleSTS.config.getLostPriceForRelease();
 
-      if (lostPriceForRelease.compareTo(BigDecimal.ZERO) > 0) {
-        if (lostPriceForRelease.compareTo(BigDecimal.ZERO) < 0 || lostPriceForRelease.compareTo(BigDecimal.ONE) > 0) {
-          throw new IllegalArgumentException("The lost price for release must be between 0 and 1 (0% and 100%)");
+          if (lostPriceForRelease.compareTo(BigDecimal.ZERO) > 0) {
+            if (lostPriceForRelease.compareTo(BigDecimal.ZERO) < 0 || lostPriceForRelease.compareTo(BigDecimal.ONE) > 0) {
+              throw new IllegalArgumentException("The lost price for release must be between 0 and 1 (0% and 100%)");
+            }
+
+            BigDecimal discount = price.multiply(lostPriceForRelease);
+            price = price.subtract(discount);
+          }
+        } else {
+          if (userinfo.hasCooldown()) {
+            PlayerUtils.sendMessage(
+              player,
+              CobbleSTS.language.getCooldownMessage()
+                .replace("%time%", PlayerUtils.getCooldown(new Date(userinfo.getCooldown()))),
+              CobbleSTS.language.getPrefix(),
+              TypeMessage.CHAT
+            );
+            return;
+          }
         }
 
-        BigDecimal discount = price.multiply(lostPriceForRelease);
-        price = price.subtract(discount);
-      }
-    } else {
-      if (userinfo.hasCooldown()) {
+        if (price.compareTo(BigDecimal.ZERO) <= 0) {
+          if (STSAction.SELL == stsAction) {
+            PlayerUtils.sendMessage(
+              player,
+              CobbleSTS.language.getMessagePriceIsZero(),
+              CobbleSTS.language.getPrefix(),
+              TypeMessage.CHAT
+            );
+          }
+          return;
+        }
+
+        if (!Cobblemon.INSTANCE.getStorage().getParty(player).remove(pokemon)) {
+          Cobblemon.INSTANCE.getStorage().getPC(player).remove(pokemon);
+        }
         PlayerUtils.sendMessage(
           player,
-          CobbleSTS.language.getCooldownMessage()
-            .replace("%time%", PlayerUtils.getCooldown(new Date(userinfo.getCooldown()))),
+          PokemonUtils.replace(CobbleSTS.language.getMessageSell(), pokemon)
+            .replace("%price%", EconomyApi.formatMoney(price, CobbleSTS.config.getEconomyUse())),
           CobbleSTS.language.getPrefix(),
           TypeMessage.CHAT
         );
-        return;
-      }
-    }
-
-    if (price.compareTo(BigDecimal.ZERO) <= 0) {
-      if (STSAction.SELL == stsAction) {
-        PlayerUtils.sendMessage(
-          player,
-          CobbleSTS.language.getMessagePriceIsZero(),
-          CobbleSTS.language.getPrefix(),
-          TypeMessage.CHAT
-        );
-      }
-      return;
-    }
-
-    if (!Cobblemon.INSTANCE.getStorage().getParty(player).remove(pokemon)) {
-      Cobblemon.INSTANCE.getStorage().getPC(player).remove(pokemon);
-    }
-    PlayerUtils.sendMessage(
-      player,
-      PokemonUtils.replace(CobbleSTS.language.getMessageSell(), pokemon)
-        .replace("%price%", EconomyApi.formatMoney(price, CobbleSTS.config.getEconomyUse())),
-      CobbleSTS.language.getPrefix(),
-      TypeMessage.CHAT
-    );
-    EconomyApi.addMoney(player.getUuid(), price, CobbleSTS.config.getEconomyUse());
-    if (stsAction == STSAction.SELL) {
-      userinfo.setCooldown(player);
-      DataBaseFactory.INSTANCE.updateUserInfo(userinfo);
-    }
+        EconomyApi.addMoney(player.getUuid(), price, CobbleSTS.config.getEconomyUse());
+        if (stsAction == STSAction.SELL) {
+          userinfo.setCooldown(player);
+          DataBaseFactory.INSTANCE.updateUserInfo(userinfo);
+        }
+      }, CobbleSTS.EXECUTOR_STS)
+      .exceptionally(e -> {
+        e.printStackTrace();
+        return null;
+      });
   }
 
   public static BigDecimal getPrice(Pokemon pokemon) {

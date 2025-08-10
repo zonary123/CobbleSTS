@@ -97,7 +97,7 @@ public class DataBaseSQLite extends DataBaseClient {
         } catch (SQLException e) {
           CobbleUtils.LOGGER.error(CobbleSTS.MOD_ID, "Error updating user information in SQLite");
         }
-      })
+      }, CobbleSTS.EXECUTOR_STS)
       .orTimeout(5, TimeUnit.SECONDS)
       .exceptionally(ex -> {
         CobbleUtils.LOGGER.error(CobbleSTS.MOD_ID,

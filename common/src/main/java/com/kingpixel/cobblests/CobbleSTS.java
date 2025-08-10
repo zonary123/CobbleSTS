@@ -3,6 +3,7 @@ package com.kingpixel.cobblests;
 import ca.landonjw.gooeylibs2.api.tasks.Task;
 import com.cobblemon.mod.common.api.Priority;
 import com.cobblemon.mod.common.api.events.CobblemonEvents;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.kingpixel.cobblests.Config.Config;
 import com.kingpixel.cobblests.Config.Lang;
 import com.kingpixel.cobblests.command.CommandTree;
@@ -19,6 +20,8 @@ import kotlin.Unit;
 import net.minecraft.server.MinecraftServer;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,6 +36,10 @@ public class CobbleSTS {
   public static MinecraftServer server;
   public static Config config = new Config();
   private static Task broadcastTask;
+  public static ExecutorService EXECUTOR_STS = Executors.newFixedThreadPool(4, new ThreadFactoryBuilder()
+    .setDaemon(true)
+    .setNameFormat("CobbleSTS-Executor-%d")
+    .build());
 
   public static void init() {
     events();
@@ -42,7 +49,7 @@ public class CobbleSTS {
     PokemonFormula.removeFormula(MOD_ID);
     files();
     tasks();
-    new DataBaseFactory(config.getDatabase());
+    DataBaseFactory.init(config.getDatabase());
   }
 
   private static void events() {
@@ -59,12 +66,18 @@ public class CobbleSTS {
     });
 
     PlayerEvent.PLAYER_JOIN.register(player -> {
-      var userinfo = DataBaseFactory.INSTANCE.getUserInfo(player);
-      if (userinfo != null) {
-        if (userinfo.check(player)) {
-          DataBaseFactory.INSTANCE.updateUserInfo(userinfo);
-        }
-      }
+      CompletableFuture.runAsync(() -> {
+          var userinfo = DataBaseFactory.INSTANCE.getUserInfo(player);
+          if (userinfo != null) {
+            if (userinfo.check(player)) {
+              DataBaseFactory.INSTANCE.updateUserInfo(userinfo);
+            }
+          }
+        }, EXECUTOR_STS)
+        .exceptionally(e -> {
+          e.printStackTrace();
+          return null;
+        });
     });
 
     PlayerEvent.PLAYER_QUIT.register(player -> {
@@ -106,7 +119,7 @@ public class CobbleSTS {
                 );
               }
             }
-          })
+          }, CobbleSTS.EXECUTOR_STS)
           .orTimeout(30, TimeUnit.SECONDS)
           .exceptionally(e -> {
             e.printStackTrace();

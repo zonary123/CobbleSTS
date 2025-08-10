@@ -8,7 +8,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.sql.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Class to handle the MySQL database.
@@ -100,8 +99,7 @@ public class DataBaseMySQL extends DataBaseClient {
         } catch (SQLException e) {
           CobbleUtils.LOGGER.error(CobbleSTS.MOD_ID, "Error updating user information in MySQL");
         }
-      })
-      .orTimeout(5, TimeUnit.SECONDS)
+      }, CobbleSTS.EXECUTOR_STS)
       .exceptionally(ex -> {
         CobbleUtils.LOGGER.error(CobbleSTS.MOD_ID,
           "Async error while updating user information in MySQL: " + userInfo.getUuid());

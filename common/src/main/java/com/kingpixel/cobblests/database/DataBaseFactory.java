@@ -15,8 +15,8 @@ import java.util.UUID;
 public class DataBaseFactory {
   public static final Map<UUID, UserInfo> users = new HashMap<>();
   public static DataBaseClient INSTANCE;
-
-  public DataBaseFactory(DataBaseConfig config) {
+  
+  public static void init(DataBaseConfig config) {
     if (INSTANCE != null) INSTANCE.disconnect();
     switch (config.getType()) {
       case JSON -> INSTANCE = new DataBaseJSON(config);

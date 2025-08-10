@@ -14,7 +14,6 @@ import com.kingpixel.cobbleutils.util.Utils;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Clase para manejar la base de datos MongoDB.
@@ -71,8 +70,7 @@ public class DataBaseMongoDB extends DataBaseClient {
         Document query = new Document("uuid", userInfo.getUuid());
         Document update = Document.parse(Utils.newWithoutSpacingGson().toJson(userInfo));
         userCollection.replaceOne(query, update, new ReplaceOptions().upsert(true));
-      })
-      .orTimeout(5, TimeUnit.SECONDS)
+      }, CobbleSTS.EXECUTOR_STS)
       .exceptionally(ex -> {
         CobbleUtils.LOGGER.error("Error when updating the userinfo of " + userInfo.getPlayerName());
         return null;
