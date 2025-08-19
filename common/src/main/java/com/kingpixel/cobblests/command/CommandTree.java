@@ -132,8 +132,10 @@ public class CommandTree {
       close -> UIManager.closeUI(close.getPlayer()),
       CobbleSTS.config.getBlacklist(),
       CobbleSTS.language.getPokemonLore(),
-      (pokemon, lore) -> lore.replaceAll(s -> s.replace("%price%", EconomyApi.formatMoney(STSUtil.getPrice(pokemon),
-        CobbleSTS.config.getEconomyUse()))),
+      (pokemon, lore) -> {
+        String value = EconomyApi.formatMoney(STSUtil.getPrice(pokemon), CobbleSTS.config.getEconomyUse());
+        lore.replaceAll(s -> s.replace("%price%", value));
+      },
       CobbleSTS.language.getConfirmMenu()
     );
   }
