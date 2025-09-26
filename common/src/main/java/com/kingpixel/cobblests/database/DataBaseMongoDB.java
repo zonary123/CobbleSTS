@@ -4,14 +4,14 @@ import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobblests.model.UserInfo;
 import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.Model.DataBaseConfig;
-import com.kingpixel.cobbleutils.bson.Document;
-import com.kingpixel.cobbleutils.mongodb.client.MongoClient;
-import com.kingpixel.cobbleutils.mongodb.client.MongoClients;
-import com.kingpixel.cobbleutils.mongodb.client.MongoCollection;
-import com.kingpixel.cobbleutils.mongodb.client.MongoDatabase;
-import com.kingpixel.cobbleutils.mongodb.client.model.ReplaceOptions;
 import com.kingpixel.cobbleutils.util.Utils;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.ReplaceOptions;
 import net.minecraft.server.network.ServerPlayerEntity;
+import org.bson.Document;
 
 import java.util.concurrent.CompletableFuture;
 

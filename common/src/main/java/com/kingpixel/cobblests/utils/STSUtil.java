@@ -12,7 +12,6 @@ import com.kingpixel.cobbleutils.util.TypeMessage;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -40,7 +39,7 @@ public class STSUtil {
             PlayerUtils.sendMessage(
               player,
               CobbleSTS.language.getCooldownMessage()
-                .replace("%time%", PlayerUtils.getCooldown(new Date(userinfo.getCooldown()))),
+                .replace("%time%", PlayerUtils.getCooldown(userinfo.getCooldown())),
               CobbleSTS.language.getPrefix(),
               TypeMessage.CHAT
             );
@@ -59,10 +58,11 @@ public class STSUtil {
           }
           return;
         }
-
-        if (!Cobblemon.INSTANCE.getStorage().getParty(player).remove(pokemon)) {
-          Cobblemon.INSTANCE.getStorage().getPC(player).remove(pokemon);
-        }
+        CobbleSTS.server.execute(() -> {
+          if (!Cobblemon.INSTANCE.getStorage().getParty(player).remove(pokemon)) {
+            Cobblemon.INSTANCE.getStorage().getPC(player).remove(pokemon);
+          }
+        });
         PlayerUtils.sendMessage(
           player,
           PokemonUtils.replace(CobbleSTS.language.getMessageSell(), pokemon)
@@ -83,7 +83,8 @@ public class STSUtil {
   }
 
   public static BigDecimal getPrice(Pokemon pokemon) {
-    var price = BigDecimal.valueOf(CobbleSTS.config.getFormula().getPokemonExpression(pokemon, CobbleSTS.MOD_ID).evaluate());
+    double basePrice = CobbleSTS.config.getFormula().getPokemonValue(pokemon);
+    var price = BigDecimal.valueOf(basePrice);
     if (price.compareTo(CobbleSTS.config.getLimitPrice()) > 0) price = CobbleSTS.config.getLimitPrice();
     return price;
   }
