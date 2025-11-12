@@ -86,7 +86,7 @@ public class CobbleSTS {
 
     CobblemonEvents.POKEMON_RELEASED_EVENT_POST.subscribe(Priority.NORMAL, evt -> {
       if (CobbleSTS.config.isReleasePokemon())
-        STSUtil.Sell(evt.getPokemon(), evt.getPlayer(), STSUtil.STSAction.RELEASE);
+        STSUtil.sell(evt.getPokemon(), evt.getPlayer(), STSUtil.STSAction.RELEASE);
       return Unit.INSTANCE;
     });
   }

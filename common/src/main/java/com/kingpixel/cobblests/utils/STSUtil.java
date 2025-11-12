@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
  * @author Carlos Varas Alonso - 12/04/2025 19:18
  */
 public class STSUtil {
-  public static void Sell(Pokemon pokemon, ServerPlayerEntity player, STSAction stsAction) {
+  public static void sell(Pokemon pokemon, ServerPlayerEntity player, STSAction stsAction) {
     if (CommandTree.isBattleActive(player)) return;
     CompletableFuture.runAsync(() -> {
         var userinfo = DataBaseFactory.INSTANCE.getUserInfo(player);

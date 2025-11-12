@@ -2,6 +2,7 @@ package com.kingpixel.cobblests.command;
 
 import ca.landonjw.gooeylibs2.api.UIManager;
 import com.cobblemon.mod.common.Cobblemon;
+import com.cobblemon.mod.common.command.argument.PartySlotArgumentType;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
 import com.kingpixel.cobblests.database.DataBaseFactory;
@@ -111,7 +112,31 @@ public class CommandTree {
               message));
           }
           return 1;
-        })));
+        })
+      )
+    );
+
+    // /sts sell <slot>
+    dispatcher.register(
+      base
+        .then(CommandManager.literal("sell")
+          .requires(source -> PermissionApi.hasPermission(
+            source, "cobblests.sell", 2
+          ))
+          .then(
+            CommandManager.argument("slot", PartySlotArgumentType.Companion.partySlot())
+              .executes(context -> {
+                if (!context.getSource().isExecutedByPlayer()) return 0;
+                ServerPlayerEntity player = context.getSource().getPlayer();
+                if (player == null) return 0;
+                if (isBattleActive(player)) return 0;
+                var pokemon = PartySlotArgumentType.Companion.getPokemon(context, "slot");
+                STSUtil.sell(pokemon, player, STSUtil.STSAction.SELL);
+                return 1;
+              })
+          )
+        )
+    );
 
   }
 
@@ -126,7 +151,7 @@ public class CommandTree {
       pokemonAction -> {
         Pokemon pokemon = pokemonAction.getPokemon();
         ServerPlayerEntity player1 = pokemonAction.getAction().getPlayer();
-        STSUtil.Sell(pokemon, player1, STSUtil.STSAction.SELL);
+        STSUtil.sell(pokemon, player1, STSUtil.STSAction.SELL);
         UIManager.closeUI(player1);
       },
       close -> UIManager.closeUI(close.getPlayer()),
