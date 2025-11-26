@@ -2,6 +2,7 @@ package com.kingpixel.cobblests.command;
 
 import ca.landonjw.gooeylibs2.api.UIManager;
 import com.cobblemon.mod.common.Cobblemon;
+import com.cobblemon.mod.common.battles.BattleRegistry;
 import com.cobblemon.mod.common.command.argument.PartySlotArgumentType;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
@@ -152,7 +153,10 @@ public class CommandTree {
         Pokemon pokemon = pokemonAction.getPokemon();
         ServerPlayerEntity player1 = pokemonAction.getAction().getPlayer();
         STSUtil.sell(pokemon, player1, STSUtil.STSAction.SELL);
-        UIManager.closeUI(player1);
+        CobbleSTS.server.executeSync(() -> {
+          UIManager.closeUI(player1);
+          open(player);
+        });
       },
       close -> UIManager.closeUI(close.getPlayer()),
       CobbleSTS.config.getBlacklist(),
@@ -166,7 +170,7 @@ public class CommandTree {
   }
 
   public static boolean isBattleActive(ServerPlayerEntity player) {
-    boolean battleActive = Cobblemon.INSTANCE.getBattleRegistry().getBattleByParticipatingPlayer(player) != null;
+    boolean battleActive = BattleRegistry.getBattleByParticipatingPlayer(player) != null;
     if (battleActive) {
       PlayerUtils.sendMessage(
         player,
