@@ -1,8 +1,6 @@
 package com.kingpixel.cobblests.command;
 
 import ca.landonjw.gooeylibs2.api.UIManager;
-import com.cobblemon.mod.common.Cobblemon;
-import com.cobblemon.mod.common.battles.BattleRegistry;
 import com.cobblemon.mod.common.command.argument.PartySlotArgumentType;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
@@ -130,7 +128,7 @@ public class CommandTree {
                 if (!context.getSource().isExecutedByPlayer()) return 0;
                 ServerPlayerEntity player = context.getSource().getPlayer();
                 if (player == null) return 0;
-                if (isBattleActive(player)) return 0;
+                if (PlayerUtils.isBattle(player)) return 0;
                 var pokemon = PartySlotArgumentType.Companion.getPokemon(context, "slot");
                 STSUtil.sell(pokemon, player, STSUtil.STSAction.SELL);
                 return 1;
@@ -143,7 +141,7 @@ public class CommandTree {
 
   private static void open(ServerPlayerEntity player) {
     if (player == null) return;
-    if (isBattleActive(player)) return;
+    if (PlayerUtils.isBattle(player)) return;
     CobbleSTS.language.getPartyPcMenu().openParty(
       player,
       template -> {
@@ -153,10 +151,7 @@ public class CommandTree {
         Pokemon pokemon = pokemonAction.getPokemon();
         ServerPlayerEntity player1 = pokemonAction.getAction().getPlayer();
         STSUtil.sell(pokemon, player1, STSUtil.STSAction.SELL);
-        CobbleSTS.server.executeSync(() -> {
-          UIManager.closeUI(player1);
-          open(player);
-        });
+        UIManager.closeUI(player1);
       },
       close -> UIManager.closeUI(close.getPlayer()),
       CobbleSTS.config.getBlacklist(),
@@ -167,18 +162,5 @@ public class CommandTree {
       },
       CobbleSTS.language.getConfirmMenu()
     );
-  }
-
-  public static boolean isBattleActive(ServerPlayerEntity player) {
-    boolean battleActive = BattleRegistry.getBattleByParticipatingPlayer(player) != null;
-    if (battleActive) {
-      PlayerUtils.sendMessage(
-        player,
-        CobbleSTS.language.getMessageInBattle(),
-        CobbleSTS.language.getPrefix(),
-        TypeMessage.CHAT
-      );
-    }
-    return battleActive;
   }
 }

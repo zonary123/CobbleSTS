@@ -3,7 +3,6 @@ package com.kingpixel.cobblests.utils;
 import com.cobblemon.mod.common.Cobblemon;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobblests.CobbleSTS;
-import com.kingpixel.cobblests.command.CommandTree;
 import com.kingpixel.cobblests.database.DataBaseFactory;
 import com.kingpixel.cobbleutils.api.EconomyApi;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
@@ -13,13 +12,14 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.math.BigDecimal;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Carlos Varas Alonso - 12/04/2025 19:18
  */
 public class STSUtil {
   public static void sell(Pokemon pokemon, ServerPlayerEntity player, STSAction stsAction) {
-    if (CommandTree.isBattleActive(player)) return;
+    if (PlayerUtils.isBattle(player)) return;
     CompletableFuture.runAsync(() -> {
         var userinfo = DataBaseFactory.INSTANCE.getUserInfo(player);
         BigDecimal price = getPrice(pokemon);
@@ -59,9 +59,8 @@ public class STSUtil {
           return;
         }
         CobbleSTS.server.execute(() -> {
-          if (!Cobblemon.INSTANCE.getStorage().getParty(player).remove(pokemon)) {
+          if (!Cobblemon.INSTANCE.getStorage().getParty(player).remove(pokemon))
             Cobblemon.INSTANCE.getStorage().getPC(player).remove(pokemon);
-          }
         });
         PlayerUtils.sendMessage(
           player,
@@ -76,6 +75,7 @@ public class STSUtil {
           DataBaseFactory.INSTANCE.updateUserInfo(userinfo);
         }
       }, CobbleSTS.EXECUTOR_STS)
+      .orTimeout(5, TimeUnit.SECONDS)
       .exceptionally(e -> {
         e.printStackTrace();
         return null;
