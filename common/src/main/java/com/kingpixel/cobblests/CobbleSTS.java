@@ -18,10 +18,8 @@ import dev.architectury.event.events.common.PlayerEvent;
 import kotlin.Unit;
 import net.minecraft.server.MinecraftServer;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.Collections;
+import java.util.concurrent.*;
 
 /**
  * @author Carlos Varas Alonso - 28/04/2024 23:50
@@ -35,9 +33,13 @@ public class CobbleSTS {
   public static MinecraftServer server;
   public static Config config = new Config();
   private static Task broadcastTask;
-  public static final ExecutorService EXECUTOR_STS = Executors.newFixedThreadPool(4, new ThreadFactoryBuilder()
+  public static final ExecutorService EXECUTOR_STS = Executors.newFixedThreadPool(1, new ThreadFactoryBuilder()
     .setDaemon(true)
     .setNameFormat("CobbleSTS-Executor-%d")
+    .build());
+  private static final ScheduledExecutorService SCHEDULED_EXECUTOR_STS = Executors.newScheduledThreadPool(1, new ThreadFactoryBuilder()
+    .setDaemon(true)
+    .setNameFormat("CobbleSTS-Scheduled-Executor-%d")
     .build());
 
   public static void init() {
@@ -102,30 +104,21 @@ public class CobbleSTS {
 
     if (broadcastTask != null) broadcastTask.setExpired();
     long cooldown = (20L * 60L) * config.getAlertCooldown();
-    broadcastTask = Task.builder()
-      .execute(() -> {
-        CompletableFuture.runAsync(() -> {
-            var players = server.getPlayerManager().getPlayerList();
-            for (var player : players) {
-              UserInfo userInfo = DataBaseFactory.INSTANCE.getUserInfo(player);
-              if (!userInfo.hasCooldown()) {
-                PlayerUtils.sendMessage(
-                  player,
-                  language.getReadytosell(),
-                  language.getPrefix(),
-                  TypeMessage.CHAT
-                );
-              }
-            }
-          }, CobbleSTS.EXECUTOR_STS)
-          .orTimeout(30, TimeUnit.SECONDS)
-          .exceptionally(e -> {
-            e.printStackTrace();
-            return null;
-          });
-      })
-      .interval(cooldown)
-      .infinite()
-      .build();
+    SCHEDULED_EXECUTOR_STS.scheduleWithFixedDelay(() -> {
+      if (server == null) return;
+      var players = Collections.synchronizedCollection(server.getPlayerManager().getPlayerList());
+      for (var player : players) {
+        if (player == null) continue;
+        UserInfo userInfo = DataBaseFactory.INSTANCE.getUserInfo(player);
+        if (!userInfo.hasCooldown()) {
+          PlayerUtils.sendMessage(
+            player,
+            language.getReadytosell(),
+            language.getPrefix(),
+            TypeMessage.CHAT
+          );
+        }
+      }
+    }, cooldown, cooldown, TimeUnit.SECONDS);
   }
 }

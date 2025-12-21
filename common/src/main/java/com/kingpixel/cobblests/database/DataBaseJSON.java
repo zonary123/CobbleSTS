@@ -37,7 +37,7 @@ public class DataBaseJSON extends DataBaseClient {
       }
     });
 
-    if (!future.join()) {
+    if (Boolean.FALSE.equals(future.join())) {
       userinfo = new UserInfo(player);
       DataBaseFactory.users.put(player.getUuid(), userinfo);
     } else {
