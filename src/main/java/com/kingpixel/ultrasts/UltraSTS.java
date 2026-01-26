@@ -33,7 +33,6 @@ public class UltraSTS implements ModInitializer {
   public static Lang language = new Lang();
   public static MinecraftServer server;
   public static Config config = new Config();
-  private static Task broadcastTask;
   public static final ExecutorService EXECUTOR_STS = Executors.newFixedThreadPool(1, new ThreadFactoryBuilder()
     .setDaemon(true)
     .setNameFormat("UltraSTS-Executor-%d")
@@ -102,8 +101,6 @@ public class UltraSTS implements ModInitializer {
 
   private static void tasks() {
     if (!config.isNotifyReady() || config.getAlertCooldown() <= 0) return;
-
-    if (broadcastTask != null) broadcastTask.setExpired();
     long cooldown = (20L * 60L) * config.getAlertCooldown();
     SCHEDULED_EXECUTOR_STS.scheduleWithFixedDelay(() -> {
       if (server == null) return;
