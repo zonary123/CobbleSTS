@@ -5,6 +5,7 @@ bin
 .metadata
 .classpath
 .project
+actual_versions
 /.architectury-transformer/
 
 # idea

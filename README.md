@@ -1,8 +1,8 @@
-# CobbleSTS
+# UltraSTS
 
 ## Description
 
-CobbleSTS is a plugin for [Cobblemon](https://modrinth.com/mod/cobblemon) that allows players to sell Pokemon from the
+UltraSTS is a plugin for [Cobblemon](https://modrinth.com/mod/cobblemon) that allows players to sell Pokemon from the
 server using in-game currency. The plugin is inspired by the STS system in the Pixelmon mod for Minecraft.
 
 Please test the plugin and report any issues and if anything happens to add or change also mention it it will be a great
@@ -10,7 +10,7 @@ help to improve the plugin.
 
 ## Configuration
 
-The config file is located at `config/cobblests/config.json`
+The config file is located at `config/UltraSTS/config.json`
 have configure language
 Some of the options are to increase the final price of the pokemon based on x characteristics.
 

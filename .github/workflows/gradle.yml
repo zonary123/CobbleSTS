@@ -1,0 +1,106 @@
+name: Java CI with Gradle + Modrinth Release
+
+on:
+  push:
+    tags: [ '*' ]
+
+env:
+  MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set project name from gradle.properties
+        run: |
+          MOD_NAME=$(grep '^mod_name=' gradle.properties | cut -d'=' -f2)
+          echo "MOD_NAME=$MOD_NAME" >> $GITHUB_ENV
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle Wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper/
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Build with Gradle Wrapper
+        run: ./gradlew build remapJar --no-daemon
+
+      - name: Upload built JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.MOD_NAME }}
+          path: build/libs/*.jar
+
+      - name: Create GitHub Release if not exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=${{ github.ref_name }}
+          if ! gh release view $TAG --repo ${{ github.repository }} 2>/dev/null; then
+            gh release create $TAG --title "Release $TAG" --notes "Automated release for version $TAG" --repo ${{ github.repository }}
+          fi
+
+      - name: Upload Release Assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FILE=$(ls build/libs/*.jar | grep -v "sources" | head -n1)
+          gh release upload ${{ github.ref_name }} $FILE --repo ${{ github.repository }}
+
+      - name: Get changelog for current version
+        id: changelog
+        run: |
+          VERSION=${{ github.ref_name }}
+          awk -v ver="$VERSION" '$0 ~ "## \\["ver"\\]" {flag=1; next} /^## / && flag {flag=0} flag {print}' CHANGELOG.md > changelog_current.txt
+          CHANGES=$(sed 's/"/\\"/g' changelog_current.txt | sed ':a;N;$!ba;s/\n/\\n/g')
+          echo "CHANGELOG_CONTENT=$CHANGES" >> $GITHUB_ENV
+
+      - name: Send JAR to Discord
+        run: |
+          FILE=$(ls build/libs/*.jar | grep -v "sources" | head -n1)
+          curl -F "payload_json={\"content\": \"@everyone\n**New release:** ${{ github.ref_name }}\\n\\n**Changes:**\\n${{ env.CHANGELOG_CONTENT }}\"}" \
+               -F "file=@${FILE}" \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Set MODRINTH_VERSION
+        run: |
+          MODRINTH_VERSION=$(grep -E '^mod_version=' gradle.properties | cut -d'=' -f2)
+          echo "MODRINTH_VERSION=$MODRINTH_VERSION" >> $GITHUB_ENV
+
+      - name: Check if version exists on Modrinth
+        run: |
+          PROJECT_ID="${{ env.MOD_NAME }}"
+          EXISTS=$(curl -s "https://api.modrinth.com/v2/project/$PROJECT_ID/version" | jq -r ".[] | select(.version_number==\"${MODRINTH_VERSION}\") | .version_number")
+          if [ -n "$EXISTS" ]; then
+            exit 0
+          fi
+
+      - name: Publish to Modrinth
+        run: ./gradlew modrinth -PuploadFile=build/libs/${{ env.MOD_NAME }}-${MODRINTH_VERSION}.jar
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MODRINTH_VERSION: ${{ env.MODRINTH_VERSION }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
