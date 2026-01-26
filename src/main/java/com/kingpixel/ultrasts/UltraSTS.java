@@ -26,9 +26,9 @@ import java.util.concurrent.*;
  * @author Carlos Varas Alonso - 28/04/2024 23:50
  */
 public class UltraSTS implements ModInitializer {
-  public static final String MOD_ID = "cobblests";
-  public static final String MOD_NAME = "CobbleSTS";
-  public static final String PATH = "/config/cobblests/";
+  public static final String MOD_ID = "ultrasts";
+  public static final String MOD_NAME = "UltraSTS";
+  public static final String PATH = "/config/ultrasts/";
   public static final String PATH_DATA = PATH + "data/";
   public static Lang language = new Lang();
   public static MinecraftServer server;
@@ -36,11 +36,11 @@ public class UltraSTS implements ModInitializer {
   private static Task broadcastTask;
   public static final ExecutorService EXECUTOR_STS = Executors.newFixedThreadPool(1, new ThreadFactoryBuilder()
     .setDaemon(true)
-    .setNameFormat("CobbleSTS-Executor-%d")
+    .setNameFormat("UltraSTS-Executor-%d")
     .build());
   private static final ScheduledExecutorService SCHEDULED_EXECUTOR_STS = Executors.newScheduledThreadPool(1, new ThreadFactoryBuilder()
     .setDaemon(true)
-    .setNameFormat("CobbleSTS-Scheduled-Executor-%d")
+    .setNameFormat("UltraSTS-Scheduled-Executor-%d")
     .build());
 
   public static void init() {
