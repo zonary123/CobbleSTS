@@ -1,17 +1,26 @@
 package com.kingpixel.ultrasts.models;
 
+import ca.landonjw.gooeylibs2.api.button.GooeyButton;
+import ca.landonjw.gooeylibs2.api.button.RateLimitedButton;
 import com.kingpixel.cobbleutils.Model.DurationValue;
 import com.kingpixel.cobbleutils.Model.ItemModel;
 import com.kingpixel.cobbleutils.Model.PokemonBlackList;
 import com.kingpixel.cobbleutils.Model.PokemonFormula;
 import com.kingpixel.cobbleutils.Model.economy.EconomySelector;
+import com.kingpixel.cobbleutils.util.PlayerUtils;
+import com.kingpixel.ultrasts.UltraSTS;
+import com.kingpixel.ultrasts.gui.STSMenu;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.minecraft.server.network.ServerPlayerEntity;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Data
 @Builder
@@ -45,4 +54,12 @@ public class STS {
   @Builder.Default
   private PokemonBlackList blackList = new PokemonBlackList();
 
+  @Nullable
+  public RateLimitedButton getButton(ServerPlayerEntity player) {
+    User user = UltraSTS.database.getUser(player.getUuid());
+    if (user == null) return null;
+    List<String> lore = new ArrayList<>(display.getLore());
+    lore.replaceAll(s -> s.replace("%cooldown%", PlayerUtils.getCooldown(user.getCooldown(this))));
+    return display.getButton(1, null, lore, action -> STSMenu.open(player, this), 1, TimeUnit.SECONDS, 1);
+  }
 }
