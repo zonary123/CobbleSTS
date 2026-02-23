@@ -1,0 +1,27 @@
+{
+    "schemaVersion": 1,
+    "name": "${mod_name}",
+    "id": "${mod_id}",
+    "version": "${mod_version}",
+    "description": "${mod_description}",
+    "authors": [
+        "${author}"
+    ],
+    "contact": {
+    },
+    "entrypoints": {
+        "main": [
+            "com.kingpixel.ultrasts.UltraSTS"
+        ]
+    },
+    "license": "${license}",
+    "environment": "*",
+    "depends": {
+        "fabricloader": "*",
+        "fabric": "*",
+        "minecraft": "1.21.1",
+        "architectury": ">=13.0.8",
+        "cobblemon": "*",
+        "cobbleutils": "*"
+    }
+}

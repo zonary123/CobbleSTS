@@ -1,0 +1,82 @@
+name: Build, Discord & Modrinth Release
+
+on:
+    push:
+        tags: [ "*" ]
+
+env:
+    DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+    full-release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            -   uses: actions/checkout@v4
+
+            -   name: Set project info
+                id: set-info
+                run: |
+                    TAG="${{ github.ref_name }}"
+                    MOD_NAME=$(grep '^mod_name=' gradle.properties | cut -d'=' -f2)
+                    MOD_VERSION=$(grep '^mod_version=' gradle.properties | cut -d'=' -f2)
+                    echo "TAG=$TAG" >> $GITHUB_ENV
+                    echo "MOD_NAME=$MOD_NAME" >> $GITHUB_ENV
+                    echo "MOD_VERSION=$MOD_VERSION" >> $GITHUB_ENV
+
+            -   uses: actions/setup-java@v4
+                with:
+                    java-version: "21"
+                    distribution: "temurin"
+
+            -   uses: gradle/actions/setup-gradle@v4
+
+            -   run: chmod +x ./gradlew
+
+            -   uses: actions/cache@v3
+                with:
+                    path: |
+                        ~/.gradle/caches
+                        ~/.gradle/wrapper
+                    key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+            -   name: Build mod
+                run: ./gradlew build remapJar --no-daemon
+
+            -   name: Create GitHub Release
+                run: |
+                    gh release create "$TAG" build/libs/*.jar \
+                      --title "Release $TAG" \
+                      --notes "Automated release for version $TAG"
+
+            -   name: Send Discord Notification with Embed and Files
+                run: |
+                    # Extraer changelog
+                    BASE=$(echo "$TAG" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+                    CHANGELOG_CONTENT=$(tr -d '\r' < CHANGELOG.md | awk -v ver="$BASE" '
+                      $0 ~ "## \\[" ver "\\]" {flag=1; next}
+                      /^## \[/ && flag {flag=0}
+                      flag {print}
+                    ')
+                    
+                    JSON_PAYLOAD=$(jq -nc --arg tag "$TAG" --arg changelog "$CHANGELOG_CONTENT" \
+                      '{content: "@everyone 🎉 New Release!", embeds:[{title:("Release "+$tag), description:$changelog, color:3066993}]}')
+                    
+                    echo "Embed JSON:"
+                    echo "$JSON_PAYLOAD"
+                    
+                    # Enviar primero el embed
+                    curl -s -X POST "$DISCORD_WEBHOOK_URL" \
+                      -H "Content-Type: application/json" \
+                      -d "$JSON_PAYLOAD"
+                    
+                    # Enviar todos los JARs (excepto sources) como archivos adjuntos
+                    for FILE in build/libs/*.jar; do
+                      if [[ "$FILE" != *"-sources.jar" ]]; then
+                        echo "Enviando $FILE a Discord..."
+                        curl -s -X POST "$DISCORD_WEBHOOK_URL" -F "file=@${FILE}"
+                      fi
+                    done
