@@ -64,8 +64,7 @@ public class STSMenu {
                           UltraSTS.lang.getNotificationSelling()
                             .replace("%price%", selectSTS.getEconomy().format(BigDecimal.valueOf(selectSTS.getFormula().getValue(pokemon)))),
                           pokemon
-                        )
-                        ,
+                        ),
                         UltraSTS.lang.getPrefix(),
                         TypeMessage.CHAT
                       );
