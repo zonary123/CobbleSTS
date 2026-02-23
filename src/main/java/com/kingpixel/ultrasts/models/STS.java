@@ -7,6 +7,7 @@ import com.kingpixel.cobbleutils.Model.ItemModel;
 import com.kingpixel.cobbleutils.Model.PokemonBlackList;
 import com.kingpixel.cobbleutils.Model.PokemonFormula;
 import com.kingpixel.cobbleutils.Model.economy.EconomySelector;
+import com.kingpixel.cobbleutils.api.PermissionApi;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
 import com.kingpixel.ultrasts.UltraSTS;
 import com.kingpixel.ultrasts.gui.STSMenu;
@@ -60,6 +61,12 @@ public class STS {
     if (user == null) return null;
     List<String> lore = new ArrayList<>(display.getLore());
     lore.replaceAll(s -> s.replace("%cooldown%", PlayerUtils.getCooldown(user.getCooldown(this))));
-    return display.getButton(1, null, lore, action -> STSMenu.open(player, this), 1, TimeUnit.SECONDS, 1);
+    return display.getButton(1, null, lore, action -> {
+      if (!permission.isEmpty() && !PermissionApi.hasPermission(player, permission, 2)) {
+        PlayerUtils.sendMessage(player, "&cYou do not have permission to enter this STS category!", UltraSTS.lang.getPrefix());
+        return;
+      }
+      STSMenu.open(player, this);
+    }, 1, TimeUnit.SECONDS, 1);
   }
 }
