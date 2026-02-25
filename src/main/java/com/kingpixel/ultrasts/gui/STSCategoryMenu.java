@@ -47,7 +47,6 @@ public class STSCategoryMenu {
 
       var categories = STSConf.STS_MAP.values();
       for (STS category : categories) {
-        if (!user.canJoin(category)) continue;
         RateLimitedButton button = category.getButton(player);
         category.getDisplay().applyTemplate(template, button);
       }

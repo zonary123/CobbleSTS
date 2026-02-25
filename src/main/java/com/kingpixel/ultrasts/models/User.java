@@ -137,8 +137,8 @@ public class User {
     return UtilsFile.getGson().fromJson(doc.toJson(), User.class);
   }
 
-  public boolean canJoin(STS selectSTS) {
-    return PermissionApi.hasPermission(uuid, "ultrasts.join." + selectSTS.getId(), 2);
+  public boolean hasPermission(ServerPlayerEntity player,STS selectSTS) {
+    return PermissionApi.hasPermission(player, "ultrasts.join." + selectSTS.getId(), 2);
   }
 
   public void removeCooldown(STS selectSTS) {

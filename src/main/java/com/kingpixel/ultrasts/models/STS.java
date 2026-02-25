@@ -1,13 +1,12 @@
 package com.kingpixel.ultrasts.models;
 
-import ca.landonjw.gooeylibs2.api.button.GooeyButton;
 import ca.landonjw.gooeylibs2.api.button.RateLimitedButton;
+import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.Model.DurationValue;
 import com.kingpixel.cobbleutils.Model.ItemModel;
 import com.kingpixel.cobbleutils.Model.PokemonBlackList;
 import com.kingpixel.cobbleutils.Model.PokemonFormula;
 import com.kingpixel.cobbleutils.Model.economy.EconomySelector;
-import com.kingpixel.cobbleutils.api.PermissionApi;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
 import com.kingpixel.ultrasts.UltraSTS;
 import com.kingpixel.ultrasts.gui.STSMenu;
@@ -36,7 +35,8 @@ public class STS {
     .displayname("&bSTS")
     .lore(List.of(
       "&7Click to entrer the category STS",
-      "&7Cooldown: %cooldown%"
+      "&7Cooldown: %cooldown%",
+      "&7Can Join: %canjoin%"
     ))
     .build();
   @Builder.Default
@@ -60,9 +60,12 @@ public class STS {
     User user = UltraSTS.database.getUser(player.getUuid());
     if (user == null) return null;
     List<String> lore = new ArrayList<>(display.getLore());
-    lore.replaceAll(s -> s.replace("%cooldown%", PlayerUtils.getCooldown(user.getCooldown(this))));
+    lore.replaceAll(s -> s
+      .replace("%cooldown%", PlayerUtils.getCooldown(user.getCooldown(this)))
+      .replace("%canjoin%", user.hasPermission(player,this) ? CobbleUtils.language.getYes() : CobbleUtils.language.getNo())
+    );
     return display.getButton(1, null, lore, action -> {
-      if (!permission.isEmpty() && !PermissionApi.hasPermission(player, permission, 2)) {
+      if (!user.hasPermission(player,this)) {
         PlayerUtils.sendMessage(player, "&cYou do not have permission to enter this STS category!", UltraSTS.lang.getPrefix());
         return;
       }
