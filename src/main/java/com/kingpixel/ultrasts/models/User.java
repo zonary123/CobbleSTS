@@ -123,19 +123,7 @@ public class User {
     return cooldowns.getOrDefault(key, 0L);
   }
 
-  public Document toDocument() {
-    try {
-      String json = UtilsFile.getGson().toJson(this);
-      return Document.parse(json);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return new Document();
-    }
-  }
 
-  public static @NotNull User fromDocument(Document doc) {
-    return UtilsFile.getGson().fromJson(doc.toJson(), User.class);
-  }
 
   public boolean hasPermission(ServerPlayerEntity player,STS selectSTS) {
     return PermissionApi.hasPermission(player, "ultrasts.join." + selectSTS.getId(), 2);
@@ -149,5 +137,13 @@ public class User {
 
   public String getMoneyEarned(STS value) {
     return value.getEconomy().format(moneyGained.getOrDefault(value.getId(), BigDecimal.ZERO));
+  }
+
+  public Document toDocument() {
+    return Document.parse(UtilsFile.getGson().toJson(this));
+  }
+
+  public static @NotNull User fromDocument(Document doc) {
+    return UtilsFile.getGson().fromJson(doc.toJson(), User.class);
   }
 }
