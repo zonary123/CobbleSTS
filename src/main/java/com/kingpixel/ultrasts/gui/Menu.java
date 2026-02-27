@@ -58,10 +58,9 @@ public class Menu {
       }, 1, TimeUnit.SECONDS, 1));
 
 
-      if(STSConf.getSize() == 1){
+      if (STSConf.getSize() == 1) {
         STS selectSTS = STSConf.getSTS("");
-        ItemModel display = selectSTS.getDisplay();
-        display.applyTemplate(template, selectSTS.getButton(player));
+        sts.applyTemplate(template, selectSTS.getButton(player));
       } else {
         sts.applyTemplate(template, sts.getButton(action -> UltraSTS.lang.getStsCategoryMenu().open(player), 1, TimeUnit.SECONDS, 1));
       }

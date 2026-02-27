@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Data
 public class LeaderBoardMenu {
   private int rows = 6;
-  private String title = "Profile Menu";
+  private String title = "&6STS Leaderboard";
   private Rectangle rectangle = new Rectangle(rows);
   private ItemModel user = ItemModel.builder()
     .item("minecraft:player_head")
@@ -37,10 +37,25 @@ public class LeaderBoardMenu {
       "&7Money Earned: %money_earned%"
     ))
     .build();
-  private ItemModel previousPage = CobbleUtils.language.getItemPrevious();
-  private ItemModel close = CobbleUtils.language.getItemClose();
-  private ItemModel nextPage = CobbleUtils.language.getItemNext();
-  private List<PanelsConfig> panels = List.of(new PanelsConfig());
+  private ItemModel previousPage = ItemModel.builder()
+    .slot(rows * 9 - 7)
+    .item("minecraft:arrow")
+    .displayname("&6Previous Page")
+    .lore(List.of("&7Go to the previous page of the leaderboard"))
+    .build();
+  private ItemModel close = ItemModel.builder()
+    .slot(rows * 9 - 5)
+    .item("minecraft:barrier")
+    .displayname("&6Close")
+    .lore(List.of("&7Close the leaderboard menu"))
+    .build();
+  private ItemModel nextPage = ItemModel.builder()
+    .slot(rows * 9 - 3)
+    .item("minecraft:arrow")
+    .displayname("&6Next Page")
+    .lore(List.of("&7Go to the next page of the leaderboard"))
+    .build();
+  private List<PanelsConfig> panels = List.of(new PanelsConfig(rows));
 
   public CompletableFuture<Void> open(ServerPlayerEntity player, STS value, int numPage) {
     return UltraSTS.database.findTopUsers(rectangle.getTotalSlots(), numPage, value)

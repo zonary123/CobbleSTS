@@ -37,7 +37,11 @@ public class SelectLeaderBoardMenu {
       PanelsConfig.applyConfig(template, panels);
 
       for (STS value : STSConf.STS_MAP.values()) {
-        ItemModel display = value.getDisplay();
+        ItemModel stsDisplay = value.getDisplay();
+        ItemModel display = ItemModel.builder()
+          .item(stsDisplay.getItem())
+          .slot(stsDisplay.getSlot())
+          .build();
         display.applyTemplate(template, display.getButton(action -> UltraSTS.lang.getLeaderBoardMenu().open(player, value, 0), 1, TimeUnit.SECONDS, 1));
       }
 

@@ -53,6 +53,7 @@ public class ProfileMenu {
       notifications.applyTemplate(template, notifications.getButton(1, null, loreNotifications, action -> {
         user.getOptions().setNotificationsEnabled(!user.getOptions().isNotificationsEnabled());
         user.markDirty();
+        open(player);
       }, 1, TimeUnit.SECONDS, 1));
 
       close.applyTemplate(template, close.getButton(action -> UltraSTS.lang.getMenu().open(player), 1, TimeUnit.SECONDS, 1));
