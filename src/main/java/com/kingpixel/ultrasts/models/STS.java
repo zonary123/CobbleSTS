@@ -1,6 +1,7 @@
 package com.kingpixel.ultrasts.models;
 
 import ca.landonjw.gooeylibs2.api.button.RateLimitedButton;
+import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.Model.DurationValue;
 import com.kingpixel.cobbleutils.Model.ItemModel;
@@ -54,6 +55,8 @@ public class STS {
   private PokemonFormula formula = new PokemonFormula();
   @Builder.Default
   private PokemonBlackList blackList = new PokemonBlackList();
+  @Builder.Default
+  private PokemonBlackList whitelist = new PokemonBlackList();
 
   @Nullable
   public RateLimitedButton getButton(ServerPlayerEntity player) {
@@ -62,14 +65,18 @@ public class STS {
     List<String> lore = new ArrayList<>(display.getLore());
     lore.replaceAll(s -> s
       .replace("%cooldown%", PlayerUtils.getCooldown(user.getCooldown(this)))
-      .replace("%canjoin%", user.hasPermission(player,this) ? CobbleUtils.language.getYes() : CobbleUtils.language.getNo())
+      .replace("%canjoin%", user.hasPermission(player, this) ? CobbleUtils.language.getYes() : CobbleUtils.language.getNo())
     );
     return display.getButton(1, null, lore, action -> {
-      if (!user.hasPermission(player,this)) {
+      if (!user.hasPermission(player, this)) {
         PlayerUtils.sendMessage(player, "&cYou do not have permission to enter this STS category!", UltraSTS.lang.getPrefix());
         return;
       }
       STSMenu.open(player, this);
     }, 1, TimeUnit.SECONDS, 1);
+  }
+
+  public boolean isBlackListed(Pokemon pokemon) {
+    return blackList.isBlackListed(pokemon) || !whitelist.isBlackListed(pokemon);
   }
 }

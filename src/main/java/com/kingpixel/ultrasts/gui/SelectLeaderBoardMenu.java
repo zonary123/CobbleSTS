@@ -40,6 +40,7 @@ public class SelectLeaderBoardMenu {
         ItemModel stsDisplay = value.getDisplay();
         ItemModel display = ItemModel.builder()
           .item(stsDisplay.getItem())
+          .displayname(stsDisplay.getDisplayname())
           .slot(stsDisplay.getSlot())
           .build();
         display.applyTemplate(template, display.getButton(action -> UltraSTS.lang.getLeaderBoardMenu().open(player, value, 0), 1, TimeUnit.SECONDS, 1));

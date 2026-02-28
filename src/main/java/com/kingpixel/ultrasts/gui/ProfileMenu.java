@@ -25,7 +25,7 @@ public class ProfileMenu {
     .slot(13)
     .item("minecraft:bell")
     .displayname("&6Notifications")
-    .lore(List.of("&7Toggle notifications for STS updates", "67Currently: %status%"))
+    .lore(List.of("&7Toggle notifications for STS updates", "&7Currently: %status%"))
     .build();
   private ItemModel close = ItemModel.builder()
     .slot(22)
