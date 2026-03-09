@@ -92,4 +92,24 @@ public class JsonDatabaseClient extends DatabaseClient {
       return CompletableFuture.completedFuture(List.of());
     }
   }
+
+  @Override
+  public CompletableFuture<Void> saveAll() {
+    var users = getSavableUsers();
+    if (users.isEmpty()) return CompletableFuture.completedFuture(null);
+
+    return CompletableFuture.allOf(
+      users.stream()
+        .map(user -> UltraSTS.ASYNC.runAsync(() -> {
+          Path path = PATH.resolve(user.getUuid() + ".json");
+          try {
+            UtilsFile.write(path, user);
+            user.setDirty(false);
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }))
+        .toArray(CompletableFuture[]::new)
+    );
+  }
 }

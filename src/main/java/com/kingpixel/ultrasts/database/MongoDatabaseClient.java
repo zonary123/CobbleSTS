@@ -9,6 +9,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.ReplaceOneModel;
 import com.mongodb.client.model.ReplaceOptions;
 import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
@@ -77,5 +78,25 @@ public class MongoDatabaseClient extends DatabaseClient {
       .limit(limit)
       .map(User::fromDocument)
       .into(new ArrayList<>()));
+  }
+
+  @Override
+  public CompletableFuture<Void> saveAll() {
+    var users = getSavableUsers();
+    if (users.isEmpty()) return CompletableFuture.completedFuture(null);
+
+    return UltraSTS.ASYNC.runAsync(() -> {
+      var bulkOperations = users.stream()
+        .map(user -> new ReplaceOneModel<>(
+          new Document("uuid", user.getUuid().toString()),
+          user.toDocument(),
+          new ReplaceOptions().upsert(true)
+        ))
+        .toList();
+
+      usersCollection.bulkWrite(bulkOperations);
+
+      users.forEach(user -> user.setDirty(false));
+    });
   }
 }

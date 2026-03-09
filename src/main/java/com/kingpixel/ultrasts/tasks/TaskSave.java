@@ -6,6 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 public class TaskSave {
   public static void register() {
-    UltraSTS.ASYNC.scheduleAtFixedRate(() -> UltraSTS.database.saveAll(), 30, 30, TimeUnit.SECONDS);
+    UltraSTS.ASYNC.scheduleAtFixedRate(() -> UltraSTS.database.saveAll(), 60L, 60L, TimeUnit.SECONDS);
   }
 }

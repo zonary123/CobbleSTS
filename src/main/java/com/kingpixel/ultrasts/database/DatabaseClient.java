@@ -38,10 +38,21 @@ public abstract class DatabaseClient {
 
   public abstract CompletableFuture<List<User>> findTopUsers(int limit, int page, STS sts);
 
+  public List<User> getSavableUsers() {
+    return USERS.asMap().values().stream()
+      .filter(User::isDirty)
+      .toList();
+  }
+
   public CompletableFuture<Void> saveAll() {
-    return CompletableFuture.allOf(USERS.asMap().values().stream()
-      .map(User::save)
-      .toArray(CompletableFuture[]::new));
+    var savableUsers = getSavableUsers();
+    if (savableUsers.isEmpty()) return CompletableFuture.completedFuture(null);
+
+    return CompletableFuture.allOf(
+      savableUsers.stream()
+        .map(User::save)
+        .toArray(CompletableFuture[]::new)
+    );
   }
 
 }

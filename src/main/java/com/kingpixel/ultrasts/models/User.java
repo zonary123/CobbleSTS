@@ -124,8 +124,7 @@ public class User {
   }
 
 
-
-  public boolean hasPermission(ServerPlayerEntity player,STS selectSTS) {
+  public boolean hasPermission(ServerPlayerEntity player, STS selectSTS) {
     return PermissionApi.hasPermission(player, "ultrasts.join." + selectSTS.getId(), 2);
   }
 
@@ -145,5 +144,13 @@ public class User {
 
   public static @NotNull User fromDocument(Document doc) {
     return UtilsFile.getGson().fromJson(doc.toJson(), User.class);
+  }
+
+  public boolean isDirty() {
+    return getDirty().get();
+  }
+
+  public void setDirty(boolean b) {
+    getDirty().set(b);
   }
 }
