@@ -42,7 +42,6 @@ public class SQLDatabaseClient extends DatabaseClient {
 
     dataSource = new HikariDataSource(hikari);
 
-    // Crear la tabla automáticamente
     String createTableSQL = """
           CREATE TABLE IF NOT EXISTS users (
               uuid CHAR(36) NOT NULL PRIMARY KEY,
@@ -65,7 +64,7 @@ public class SQLDatabaseClient extends DatabaseClient {
   @Override
   public void disconnect() {
     try {
-      saveAll().join(); // Espera que todo se guarde antes de cerrar
+      saveAll().join();
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -118,7 +117,7 @@ public class SQLDatabaseClient extends DatabaseClient {
         ps.setString(5, UtilsFile.getGson().toJson(user.getCooldowns()));
 
         ps.executeUpdate();
-        user.setDirty(false); // marcar como guardado
+        user.setDirty(false);
 
       } catch (Exception e) {
         e.printStackTrace();
@@ -128,7 +127,6 @@ public class SQLDatabaseClient extends DatabaseClient {
 
   @Override
   public CompletableFuture<List<User>> findTopUsers(int limit, int page, STS sts) {
-    // Compatible con cualquier versión: leemos todos los usuarios y ordenamos en Java
     return UltraSTS.ASYNC.supply(() -> {
       List<User> list = new ArrayList<>();
 
@@ -216,7 +214,7 @@ public class SQLDatabaseClient extends DatabaseClient {
           ps.setString(5, UtilsFile.getGson().toJson(user.getCooldowns()));
           ps.addBatch();
 
-          user.setDirty(false); // marcar como guardado
+          user.setDirty(false);
         }
 
         ps.executeBatch();

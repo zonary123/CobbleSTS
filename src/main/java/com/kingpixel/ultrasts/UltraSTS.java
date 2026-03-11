@@ -71,13 +71,9 @@ public class UltraSTS implements ModInitializer {
       if (user != null) user.save();
     });
 
-    LifecycleEvent.SERVER_STARTED.register(evt -> {
-      Tasks.register();
-    });
+    LifecycleEvent.SERVER_STARTED.register(evt -> Tasks.register());
 
-    LifecycleEvent.SERVER_STOPPING.register(server -> {
-      database.disconnect();
-    });
+    LifecycleEvent.SERVER_STOPPING.register(server -> database.disconnect());
 
     CommandRegistrationCallback.EVENT.register((dispatcher, access, env) -> {
       Commands.register(dispatcher);
