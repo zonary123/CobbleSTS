@@ -81,7 +81,7 @@ dependencies {
     modImplementation "dev.architectury:architectury-fabric:${project.architectury_version}"
     modImplementation("com.cobblemon:fabric:${property("cobblemon_version")}")
     api("net.objecthunter:exp4j:0.4.8")
-    modImplementation(fileTree(dir: 'libs', include: '*.jar'))
+    modImplementation(files(fileTree(dir: 'libs', include: '*.jar')))
     implementation("com.github.ben-manes.caffeine:caffeine:3.2.2")
     modImplementation("ca.landonjw.gooeylibs:fabric-api-repack:${property("gooeylibs_version")}")
 
