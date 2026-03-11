@@ -3,11 +3,7 @@ package com.kingpixel.ultrasts.models;
 import ca.landonjw.gooeylibs2.api.button.RateLimitedButton;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobbleutils.CobbleUtils;
-import com.kingpixel.cobbleutils.Model.DurationValue;
-import com.kingpixel.cobbleutils.Model.ItemModel;
-import com.kingpixel.cobbleutils.Model.PokemonBlackList;
-import com.kingpixel.cobbleutils.Model.PokemonFormula;
-import com.kingpixel.cobbleutils.Model.economy.EconomySelector;
+import com.kingpixel.cobbleutils.Model.*;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
 import com.kingpixel.ultrasts.UltraSTS;
 import com.kingpixel.ultrasts.gui.STSMenu;
@@ -41,7 +37,7 @@ public class STS {
     ))
     .build();
   @Builder.Default
-  private EconomySelector economy = new EconomySelector("IMPACTOR", "impactor:dollars");
+  private EconomyUse economy = new EconomyUse("IMPACTOR", "impactor:dollars");
   @Builder.Default
   private DurationValue cooldown = DurationValue.parse("5m");
   @Builder.Default

@@ -1,6 +1,7 @@
 package com.kingpixel.ultrasts.models;
 
 import com.cobblemon.mod.common.pokemon.Pokemon;
+import com.kingpixel.cobbleutils.api.EconomyApi;
 import com.kingpixel.cobbleutils.api.PermissionApi;
 import com.kingpixel.cobbleutils.util.UtilsFile;
 import com.kingpixel.ultrasts.UltraSTS;
@@ -63,13 +64,15 @@ public class User {
 
   public CompletableFuture<Boolean> sellPokemon(STS sts, Pokemon pokemon) {
     return UltraSTS.ASYNC.supply(() -> {
-      if (hasCooldown(sts)) return false;
-      addCooldown(sts);
-      BigDecimal price = BigDecimal.valueOf(sts.getFormula().getValue(pokemon));
-      if (price.compareTo(BigDecimal.ZERO) <= 0) return false;
-      moneyGained.merge(sts.getId(), price, BigDecimal::add);
-      markDirty();
-      return true;
+      synchronized (this) {
+        if (hasCooldown(sts)) return false;
+        BigDecimal price = BigDecimal.valueOf(sts.getFormula().getPokemonValue(pokemon));
+        if (price.compareTo(BigDecimal.ZERO) <= 0) return false;
+        addCooldown(sts);
+        moneyGained.merge(sts.getId(), price, BigDecimal::add);
+        markDirty();
+        return true;
+      }
     });
   }
 
@@ -135,7 +138,7 @@ public class User {
   }
 
   public String getMoneyEarned(STS value) {
-    return value.getEconomy().format(moneyGained.getOrDefault(value.getId(), BigDecimal.ZERO));
+    return EconomyApi.formatMoney(moneyGained.getOrDefault(value.getId(), BigDecimal.ZERO), value.getEconomy());
   }
 
   public Document toDocument() {
