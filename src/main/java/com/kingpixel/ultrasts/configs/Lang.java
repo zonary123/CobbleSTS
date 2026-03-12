@@ -18,6 +18,7 @@ public class Lang {
   private String notificationSTSAvailable = "&aYou have some STS available!";
   private String notificationSelling = "%prefix% &6You are sold %pokemon% STS for %price%!";
   private List<String> pokemonLore = List.of(
+    "%lorepokemon%",
     "&7Sell this pokemon for STS!",
     "&7Value: %price% STS"
   );
