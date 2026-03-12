@@ -12,3 +12,8 @@ Multiplier: `/lp user <player> meta settemp ultrabattlepass.multiplier 2 1d`
   the config and verify that the migration works correctly and that rewards are properly granted.
 - Added translation support for the leaderboard description.
 - Fixed issues with the required XP, and fixed several other things.
+
+### Bug Fixes
+
+- Fixed the `/sts reload` command — it now requires admin permission.
+- Fixed the leaderboard so it now displays the ranking number correctly.

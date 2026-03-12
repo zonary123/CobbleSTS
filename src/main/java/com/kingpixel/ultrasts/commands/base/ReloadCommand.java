@@ -1,5 +1,6 @@
 package com.kingpixel.ultrasts.commands.base;
 
+import com.kingpixel.cobbleutils.api.PermissionApi;
 import com.kingpixel.ultrasts.UltraSTS;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.server.command.CommandManager;
@@ -12,6 +13,7 @@ public class ReloadCommand {
     base
       .then(
         CommandManager.literal("reload")
+          .requires(source -> PermissionApi.hasPermission(source, "ultrasts.admin", 2))
           .executes(context -> {
             UltraSTS.reload();
             context.getSource().sendMessage(

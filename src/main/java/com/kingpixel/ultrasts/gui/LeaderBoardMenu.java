@@ -73,6 +73,7 @@ public class LeaderBoardMenu {
           List<GooeyButton> buttons = new ArrayList<>();
           for (User user : users) {
             buttons.add(getButton(user, index, value));
+            index++;
           }
           rectangle.apply(template, buttons);
 

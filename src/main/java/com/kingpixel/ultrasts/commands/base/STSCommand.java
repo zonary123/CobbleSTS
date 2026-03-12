@@ -22,7 +22,7 @@ public class STSCommand {
         CommandManager.literal("other")
           .then(
             CommandManager.argument("player", StringArgumentType.string())
-              .requires(source -> PermissionApi.hasPermission(source, "ultrasts.admin", 4))
+              .requires(source -> PermissionApi.hasPermission(source, "ultrasts.admin", 2))
               .executes(context -> {
                 String targetName = StringArgumentType.getString(context, "player");
                 ServerPlayerEntity target = context.getSource().getServer().getPlayerManager().getPlayer(targetName);
