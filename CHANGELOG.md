@@ -4,11 +4,21 @@
 
 ## [1.5.0] - 2026-03-11
 
-Multiplier: `/lp user <player> meta settemp ultrabattlepass.multiplier 2 1d`
+### Added
 
-### Features
+- Added the ability to configure **multiple STS**, where each STS can give a different amount of money.
+- Added a **leaderboard**.
 
-- Added the new CobbleUtils rewards system. It should perform the migration automatically, but please make a backup of
-  the config and verify that the migration works correctly and that rewards are properly granted.
-- Added translation support for the leaderboard description.
-- Fixed issues with the required XP, and fixed several other things.
+### Improved
+
+- Added **optimization improvements**.
+- Improved the **save system**, so it now only saves when necessary.
+
+### Bug Fixes
+
+- Fixed the `/sts reload` command — it now requires admin permission.
+- Fixed the leaderboard so it now displays the ranking number correctly.
+
+### Changed
+
+- Users can now **disable the STS available notification** individually.
