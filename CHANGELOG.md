@@ -18,6 +18,7 @@
 
 - Fixed the `/sts reload` command — it now requires **admin permission**.
 - Fixed the leaderboard so it now displays the **ranking position correctly**.
+- Fixed cooldowns permissions.
 
 ### Changed
 
