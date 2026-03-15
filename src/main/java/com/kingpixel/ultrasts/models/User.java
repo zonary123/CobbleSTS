@@ -3,6 +3,7 @@ package com.kingpixel.ultrasts.models;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobbleutils.api.EconomyApi;
 import com.kingpixel.cobbleutils.api.PermissionApi;
+import com.kingpixel.cobbleutils.util.PlayerUtils;
 import com.kingpixel.cobbleutils.util.UtilsFile;
 import com.kingpixel.ultrasts.UltraSTS;
 import lombok.AllArgsConstructor;
@@ -46,9 +47,9 @@ public class User {
   }
 
 
-  public boolean addCooldown(STS sts) {
+  public boolean addCooldown(STS sts, ServerPlayerEntity player) {
     String key = sts.getId();
-    long duration = 1000L * 60L * 5L; // 5 minutes
+    long duration = PlayerUtils.getCooldown(sts.getCooldownPermissions(), sts.getCooldown(), player);
     long now = System.currentTimeMillis();
     long expiresAt = cooldowns.getOrDefault(key, 0L);
     if (expiresAt > now) return false;
@@ -62,13 +63,13 @@ public class User {
     return cooldowns.values().stream().anyMatch(expiresAt -> expiresAt <= now);
   }
 
-  public CompletableFuture<Boolean> sellPokemon(STS sts, Pokemon pokemon) {
+  public CompletableFuture<Boolean> sellPokemon(STS sts, Pokemon pokemon, ServerPlayerEntity player) {
     return UltraSTS.ASYNC.supply(() -> {
       synchronized (this) {
         if (hasCooldown(sts)) return false;
         BigDecimal price = BigDecimal.valueOf(sts.getFormula().getPokemonValue(pokemon));
         if (price.compareTo(BigDecimal.ZERO) <= 0) return false;
-        addCooldown(sts);
+        addCooldown(sts, player);
         moneyGained.merge(sts.getId(), price, BigDecimal::add);
         markDirty();
         return true;

@@ -45,7 +45,7 @@ public class STSMenu {
       player,
       template -> {
       },
-      pokemonButtonAction -> user.sellPokemon(selectSTS, pokemonButtonAction.getPokemon())
+      pokemonButtonAction -> user.sellPokemon(selectSTS, pokemonButtonAction.getPokemon(), player)
         .whenComplete((success, throwable) -> {
 
           if (throwable != null) {
