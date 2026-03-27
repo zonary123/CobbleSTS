@@ -1,8 +1,6 @@
 package com.kingpixel.ultrasts.gui;
 
-import com.cobblemon.mod.common.Cobblemon;
 import com.cobblemon.mod.common.pokemon.Pokemon;
-import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.Model.EconomyUse;
 import com.kingpixel.cobbleutils.api.EconomyApi;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
@@ -51,62 +49,23 @@ public class STSMenu {
       template -> {
       },
       pokemonButtonAction -> user.sellPokemon(selectSTS, pokemonButtonAction.getPokemon(), player)
-        .whenComplete((success, throwable) -> {
-
+        .whenComplete((sell, throwable) -> {
           if (throwable != null) {
             throwable.printStackTrace();
-            PlayerUtils.sendMessage(player, "&cAn error occurred while selling your pokemon!", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
+            PlayerUtils.sendMessage(player, "&cAn error occurred while selling this pokemon!", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
             return;
           }
-
-          if (!success) {
-            PlayerUtils.sendMessage(player, "&cYou cannot sell this pokemon for STS!", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
-            return;
-          }
-
           Pokemon pokemon = pokemonButtonAction.getPokemon();
-
-          var party = Cobblemon.INSTANCE.getStorage().getParty(player);
-          var pc = Cobblemon.INSTANCE.getStorage().getPC(player);
-
-          CobbleUtils.server.execute(() -> {
-
-            if (party.remove(pokemon) || pc.remove(pokemon)) {
-
-              BigDecimal price = BigDecimal.valueOf(selectSTS.getFormula().getPokemonValue(pokemon));
-              EconomyUse economyUse = selectSTS.getEconomy();
-
-              boolean deposited = EconomyApi.addMoney(player.getUuid(), price, economyUse);
-
-              if (deposited) {
-                PlayerUtils.sendMessage(
-                  player,
-                  PokemonUtils.replace(
-                    UltraSTS.lang.getNotificationSelling()
-                      .replace("%price%", EconomyApi.formatMoney(price, economyUse)),
-                    pokemon
-                  ),
-                  UltraSTS.lang.getPrefix(),
-                  TypeMessage.CHAT
-                );
-              } else {
-
-                PlayerUtils.sendMessage(player,
-                  "&cAn error occurred while depositing the money for your pokemon!",
-                  UltraSTS.lang.getPrefix(),
-                  TypeMessage.CHAT
-                );
-
-                party.add(pokemon);
-                user.removeCooldown(selectSTS);
-              }
-
-            } else {
-              user.removeCooldown(selectSTS);
-            }
-          });
-
-          UltraSTS.lang.getMenu().open(player);
+          if (sell) {
+            PlayerUtils.sendMessage(player, UltraSTS.lang.getNotificationSelling()
+                .replace("%pokemon%", PokemonUtils.replace(pokemon))
+                .replace("%price%", EconomyApi.formatMoney(BigDecimal.valueOf(selectSTS.getFormula().getPokemonValue(pokemonButtonAction.getPokemon())), selectSTS.getEconomy())),
+              UltraSTS.lang.getPrefix(),
+              TypeMessage.CHAT
+            );
+          } else {
+            PlayerUtils.sendMessage(player, "&cYou cannot sell this pokemon!", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
+          }
         }),
       close -> UltraSTS.lang.getMenu().open(player),
       selectSTS.getBlackList(),

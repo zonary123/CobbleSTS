@@ -53,12 +53,11 @@ public class User {
   }
 
   public boolean addCooldown(STS sts, ServerPlayerEntity player, int amount) {
+    if (hasCooldown(sts)) return false;
     String key = sts.getId();
     long duration = PlayerUtils.getCooldown(sts.getCooldownPermissions(), sts.getCooldown(), player);
     duration *= amount;
     long now = System.currentTimeMillis();
-    long expiresAt = cooldowns.getOrDefault(key, 0L);
-    if (expiresAt > now) return false;
     cooldowns.put(key, now + duration);
     markDirty();
     return true;
@@ -82,7 +81,7 @@ public class User {
         if (party.remove(pokemon) || pc.remove(pokemon)) {
           addCooldown(sts, player);
           moneyGained.merge(sts.getId(), price, BigDecimal::add);
-          com.kingpixel.cobbleutils.api.EconomyApi.addMoney(player.getUuid(), price, sts.getEconomy());
+          EconomyApi.addMoney(player.getUuid(), price, sts.getEconomy());
           markDirty();
           return true;
         }

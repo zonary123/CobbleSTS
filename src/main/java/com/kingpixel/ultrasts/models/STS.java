@@ -44,7 +44,7 @@ public class STS {
   @Builder.Default
   private Map<String, DurationValue> cooldownPermissions = Map.of(
     "ultrasts.cooldown.reduce", DurationValue.parse("1m"),
-    "ultrasts.cooldown.bypass", DurationValue.parse("0s")
+    "ultrasts.cooldown.bypass", DurationValue.parse("1m")
   );
   @Builder.Default
   private String permission = "";
