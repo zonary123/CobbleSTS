@@ -52,8 +52,6 @@ public class STS {
   private PokemonFormula formula = new PokemonFormula();
   @Builder.Default
   private PokemonBlackList blackList = new PokemonBlackList();
-  @Builder.Default
-  private PokemonBlackList whitelist = new PokemonBlackList();
 
   @Nullable
   public RateLimitedButton getButton(ServerPlayerEntity player) {
