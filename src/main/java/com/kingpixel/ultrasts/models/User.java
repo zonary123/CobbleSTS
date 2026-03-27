@@ -115,7 +115,7 @@ public class User {
         if (actuallyRemovedCount > 0) {
           addCooldown(sts, player, actuallyRemovedCount);
           moneyGained.merge(sts.getId(), totalPool, BigDecimal::add);
-          com.kingpixel.cobbleutils.api.EconomyApi.addMoney(player.getUuid(), totalPool, sts.getEconomy());
+          EconomyApi.addMoney(player.getUuid(), totalPool, sts.getEconomy());
           markDirty();
           return totalPool;
         }

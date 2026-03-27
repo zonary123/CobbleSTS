@@ -32,7 +32,10 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.joml.Vector4f;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -261,7 +264,6 @@ public class STSSellMenu {
     User user = UltraSTS.database.getUser(player.getUuid());
     if (user == null) return;
 
-    // Convert to list for processing
     List<Pokemon> toSell = new ArrayList<>(selected);
 
     if (toSell.isEmpty()) {
@@ -269,34 +271,32 @@ public class STSSellMenu {
       return;
     }
 
-    user.sellPokemons(sts, toSell, player).whenComplete((totalPrice, throwable) -> {
-      if (throwable != null) {
-        throwable.printStackTrace();
-        PlayerUtils.sendMessage(player, "&cError processing sale.", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
-        return;
-      }
+    user.sellPokemons(sts, toSell, player)
+      .whenComplete((totalPrice, throwable) -> {
+        if (throwable != null) {
+          throwable.printStackTrace();
+          PlayerUtils.sendMessage(player, "&cError processing sale.", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
+          return;
+        }
 
-      if (totalPrice.compareTo(BigDecimal.ZERO) <= 0) {
-        PlayerUtils.sendMessage(player, "&cNo valid Pokemon were sold (perhaps they no longer exist?).", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
-        return;
-      }
+        if (totalPrice.compareTo(BigDecimal.ZERO) <= 0) {
+          PlayerUtils.sendMessage(player, "&cNo valid Pokemon were sold (perhaps they no longer exist?).", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
+          return;
+        }
 
-      CobbleUtils.server.execute(() -> {
-        // Find how many were actually sold by comparing totalPrice if needed, 
-        // but User.java now handles counting and notifying economy.
-        // We just need to notify the player and cleanup the session.
+        CobbleUtils.server.execute(() -> {
 
-        PlayerUtils.sendMessage(player,
-          UltraSTS.lang.getNotificationSellingMulti()
-            .replace("%amount%", String.valueOf(toSell.size())) // Note: This might over-report if some failed removal inside User.java
-            .replace("%price%", EconomyApi.formatMoney(totalPrice, sts.getEconomy())),
-          UltraSTS.lang.getPrefix(),
-          TypeMessage.CHAT);
-        
-        UserSTSSession session = sessions.getIfPresent(getSessionKey(player.getUuid(), sts.getId()));
-        if (session != null) session.clearSelection();
-        UltraSTS.lang.getMenu().open(player);
+          PlayerUtils.sendMessage(player,
+            UltraSTS.lang.getNotificationSellingMulti()
+              .replace("%amount%", String.valueOf(toSell.size()))
+              .replace("%price%", EconomyApi.formatMoney(totalPrice, sts.getEconomy())),
+            UltraSTS.lang.getPrefix(),
+            TypeMessage.CHAT);
+
+          UserSTSSession session = sessions.getIfPresent(getSessionKey(player.getUuid(), sts.getId()));
+          if (session != null) session.clearSelection();
+          UltraSTS.lang.getMenu().open(player);
+        });
       });
-    });
   }
 }
