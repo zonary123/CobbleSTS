@@ -17,9 +17,9 @@ public class Config {
   private String lang = "en_us";
   private List<String> commands = List.of(UltraSTS.MOD_ID, "sts");
   private DataBaseConfig database = DataBaseConfig.builder()
-          .database(UltraSTS.MOD_ID)
-          .type(DataBaseType.JSON)
-          .build();
+    .database(UltraSTS.MOD_ID)
+    .type(DataBaseType.JSON)
+    .build();
   private DurationValue notificationCooldown = DurationValue.parse("15m");
 
   public static void init() {

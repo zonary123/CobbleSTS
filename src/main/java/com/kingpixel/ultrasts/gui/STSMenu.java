@@ -41,6 +41,11 @@ public class STSMenu {
       return CompletableFuture.completedFuture(null);
     }
 
+    if (selectSTS.isMultiSelect()) {
+      UltraSTS.lang.getStsSellMenu().open(player, selectSTS);
+      return CompletableFuture.completedFuture(null);
+    }
+
     return UltraSTS.ASYNC.runAsync(() -> UltraSTS.lang.getPartyPcMenu().openParty(
       player,
       template -> {

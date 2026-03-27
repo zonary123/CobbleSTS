@@ -14,9 +14,11 @@ import java.util.List;
 @Data
 public class Lang {
   private String prefix = "&7[&6UltraSTS&7] &r";
+  private String selected = "&7[&aSelected&7]";
   private String cooldownMessage = "%prefix% &cYou are on cooldown for %time%!";
   private String notificationSTSAvailable = "&aYou have some STS available!";
   private String notificationSelling = "%prefix% &6You are sold %pokemon% STS for %price%!";
+  private String notificationSellingMulti = "%prefix% &6You sold %amount% Pokémon for %price%!";
   private List<String> pokemonLore = List.of(
     "%lorepokemon%",
     "&7Sell this pokemon for STS!",
@@ -30,6 +32,7 @@ public class Lang {
   private ConfirmMenu confirmMenu = new ConfirmMenu();
   private SelectLeaderBoardMenu selectLeaderBoardMenu = new SelectLeaderBoardMenu();
   private LeaderBoardMenu leaderBoardMenu = new LeaderBoardMenu();
+  private STSSellMenu stsSellMenu = new STSSellMenu();
 
   public static void init() {
     String language = UltraSTS.config.getLang();

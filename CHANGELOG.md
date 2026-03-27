@@ -10,6 +10,8 @@
 - Added a **leaderboard**.
 - Added `%lorepokemon%` placeholder to the Pokémon lore in the language configuration, allowing full Pokémon lore to be
   displayed in the STS menu.
+- Added **Multi-Selection System** for selling Pokémon:
+    - Users can now select multiple Pokémon from their **Party** or **PC** boxes.
 
 ### Improved
 
