@@ -68,7 +68,10 @@ public class UltraSTS implements ModInitializer {
 
     PlayerEvent.PLAYER_QUIT.register(player -> {
       User user = database.getUser(player);
-      if (user != null) user.save();
+      if (user != null) {
+        user.save();
+        DatabaseClient.USERS.invalidate(player.getUuid());
+      }
     });
 
     LifecycleEvent.SERVER_STARTED.register(evt -> Tasks.register());
