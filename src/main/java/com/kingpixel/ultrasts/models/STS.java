@@ -74,6 +74,6 @@ public class STS {
   }
 
   public boolean isBlackListed(Pokemon pokemon) {
-    return blackList.isBlackListed(pokemon) || !whitelist.isBlackListed(pokemon);
+    return blackList.isBlackListed(pokemon);
   }
 }

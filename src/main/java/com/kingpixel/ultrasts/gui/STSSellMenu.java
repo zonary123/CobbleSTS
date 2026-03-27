@@ -206,10 +206,10 @@ public class STSSellMenu {
     for (Pokemon pokemon : party) {
       if (i >= partySlots.size()) break;
       if (sts.isBlackListed(pokemon)) {
-        i++;
-        continue;
+        template.set(partySlots.get(i), GooeyButton.of(CobblemonItems.POKE_BALL.getDefaultStack()));
+      } else {
+        template.set(partySlots.get(i), createPokemonButton(player, sts, pokemon, selected));
       }
-      template.set(partySlots.get(i), createPokemonButton(player, sts, pokemon, selected));
       i++;
     }
   }
