@@ -1,21 +1,30 @@
 package com.kingpixel.ultrasts.configs;
 
+import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobbleutils.Model.DataBaseConfig;
 import com.kingpixel.cobbleutils.Model.DataBaseType;
 import com.kingpixel.cobbleutils.Model.DurationValue;
 import com.kingpixel.cobbleutils.util.UtilsFile;
 import com.kingpixel.ultrasts.UltraSTS;
 import lombok.Data;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Data
 public class Config {
   private boolean debug = false;
   private String lang = "en_us";
   private List<String> commands = List.of(UltraSTS.MOD_ID, "sts");
+  private Set<String> blockHeldItems = Set.of(
+    "minecraft:diamond",
+    "*"
+  );
   private DataBaseConfig database = DataBaseConfig.builder()
     .database(UltraSTS.MOD_ID)
     .type(DataBaseType.JSON)
@@ -38,4 +47,13 @@ public class Config {
   private void fix() {
 
   }
+
+  public boolean isItemBanned(Pokemon pokemon) {
+    ItemStack itemStack = pokemon.heldItem();
+    Item item = itemStack.getItem();
+    String itemId = "";
+    if (Objects.nonNull(item)) itemId = item.toString();
+    return UltraSTS.config.getBlockHeldItems().contains(itemId);
+  }
+
 }

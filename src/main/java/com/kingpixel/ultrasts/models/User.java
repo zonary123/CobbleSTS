@@ -1,5 +1,6 @@
 package com.kingpixel.ultrasts.models;
 
+import com.cobblemon.mod.common.Cobblemon;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.kingpixel.cobbleutils.api.EconomyApi;
 import com.kingpixel.cobbleutils.api.PermissionApi;
@@ -75,8 +76,8 @@ public class User {
         BigDecimal price = BigDecimal.valueOf(sts.getFormula().getPokemonValue(pokemon));
         if (price.compareTo(BigDecimal.ZERO) <= 0) return false;
 
-        var party = com.cobblemon.mod.common.Cobblemon.INSTANCE.getStorage().getParty(player);
-        var pc = com.cobblemon.mod.common.Cobblemon.INSTANCE.getStorage().getPC(player);
+        var party = Cobblemon.INSTANCE.getStorage().getParty(player);
+        var pc = Cobblemon.INSTANCE.getStorage().getPC(player);
 
         if (party.remove(pokemon) || pc.remove(pokemon)) {
           addCooldown(sts, player);
@@ -95,19 +96,17 @@ public class User {
       synchronized (this) {
         if (hasCooldown(sts)) return BigDecimal.ZERO;
 
-        var party = com.cobblemon.mod.common.Cobblemon.INSTANCE.getStorage().getParty(player);
-        var pc = com.cobblemon.mod.common.Cobblemon.INSTANCE.getStorage().getPC(player);
+        var party = Cobblemon.INSTANCE.getStorage().getParty(player);
+        var pc = Cobblemon.INSTANCE.getStorage().getPC(player);
 
         BigDecimal totalPool = BigDecimal.ZERO;
         int actuallyRemovedCount = 0;
 
         for (Pokemon pokemon : pokemons) {
           BigDecimal price = BigDecimal.valueOf(sts.getFormula().getPokemonValue(pokemon));
-          if (price.compareTo(BigDecimal.ZERO) > 0) {
-            if (party.remove(pokemon) || pc.remove(pokemon)) {
-              totalPool = totalPool.add(price);
-              actuallyRemovedCount++;
-            }
+          if (price.compareTo(BigDecimal.ZERO) > 0 && (party.remove(pokemon) || pc.remove(pokemon))) {
+            totalPool = totalPool.add(price);
+            actuallyRemovedCount++;
           }
         }
 
