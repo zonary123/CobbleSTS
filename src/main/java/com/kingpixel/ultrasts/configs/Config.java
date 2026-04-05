@@ -13,7 +13,6 @@ import net.minecraft.item.ItemStack;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 @Data
@@ -49,11 +48,11 @@ public class Config {
   }
 
   public boolean isItemBanned(Pokemon pokemon) {
-    ItemStack itemStack = pokemon.heldItem();
+    ItemStack itemStack = pokemon.heldItemNoCopy$common();
+    if (itemStack.isEmpty()) return false;
     Item item = itemStack.getItem();
-    String itemId = "";
-    if (Objects.nonNull(item)) itemId = item.toString();
-    return UltraSTS.config.getBlockHeldItems().contains(itemId);
+    String itemId = item.toString();
+    return blockHeldItems.contains("*") || blockHeldItems.contains(itemId);
   }
 
 }

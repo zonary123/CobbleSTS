@@ -202,15 +202,31 @@ public class STSSellMenu {
 
   private void displayParty(ServerPlayerEntity player, STS sts, ChestTemplate template, Set<Pokemon> selected) {
     var party = Cobblemon.INSTANCE.getStorage().getParty(player);
-    int i = 0;
-    for (Pokemon pokemon : party) {
-      if (i >= partySlots.size()) break;
-      if (sts.isBlackListed(pokemon)) {
-        template.set(partySlots.get(i), GooeyButton.of(CobblemonItems.POKE_BALL.getDefaultStack()));
-      } else {
-        template.set(partySlots.get(i), createPokemonButton(player, sts, pokemon, selected));
+
+    for (int i = 0; i < 6; i++) {
+
+      if (i >= party.size()) {
+        template.set(
+          partySlots.get(i),
+          GooeyButton.of(ItemStack.EMPTY)
+        );
+        continue;
       }
-      i++;
+
+      Pokemon pokemon = party.get(i);
+
+      if (sts.isBlackListed(pokemon)) {
+        template.set(
+          partySlots.get(i),
+          GooeyButton.of(CobblemonItems.POKE_BALL.getDefaultStack())
+        );
+        continue;
+      }
+
+      template.set(
+        partySlots.get(i),
+        createPokemonButton(player, sts, pokemon, selected)
+      );
     }
   }
 
