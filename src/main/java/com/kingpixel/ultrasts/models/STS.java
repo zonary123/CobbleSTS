@@ -73,6 +73,7 @@ public class STS {
   }
 
   public boolean isBlackListed(Pokemon pokemon) {
+    if (pokemon == null) return true;
     return UltraSTS.config.isItemBanned(pokemon) || blackList.isBlackListed(pokemon);
   }
 }
