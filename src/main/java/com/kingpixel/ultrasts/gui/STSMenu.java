@@ -1,6 +1,8 @@
 package com.kingpixel.ultrasts.gui;
 
+import ca.landonjw.gooeylibs2.api.UIManager;
 import com.cobblemon.mod.common.pokemon.Pokemon;
+import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.Model.EconomyUse;
 import com.kingpixel.cobbleutils.api.EconomyApi;
 import com.kingpixel.cobbleutils.util.PlayerUtils;
@@ -56,13 +58,14 @@ public class STSMenu {
             return;
           }
           Pokemon pokemon = pokemonButtonAction.getPokemon();
-          if (sell) {
+          if (Boolean.TRUE.equals(sell)) {
             PlayerUtils.sendMessage(player, UltraSTS.lang.getNotificationSelling()
                 .replace("%pokemon%", PokemonUtils.replace(pokemon))
                 .replace("%price%", EconomyApi.formatMoney(BigDecimal.valueOf(selectSTS.getFormula().getPokemonValue(pokemonButtonAction.getPokemon())), selectSTS.getEconomy())),
               UltraSTS.lang.getPrefix(),
               TypeMessage.CHAT
             );
+            CobbleUtils.server.execute(() -> UIManager.closeUI(player));
           } else {
             PlayerUtils.sendMessage(player, "&cYou cannot sell this pokemon!", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
           }

@@ -1,16 +1,20 @@
 package com.kingpixel.ultrasts.gui;
 
 import ca.landonjw.gooeylibs2.api.UIManager;
+import ca.landonjw.gooeylibs2.api.button.RateLimitedButton;
 import ca.landonjw.gooeylibs2.api.page.GooeyPage;
 import ca.landonjw.gooeylibs2.api.template.types.ChestTemplate;
 import com.kingpixel.cobbleutils.CobbleUtils;
 import com.kingpixel.cobbleutils.Model.ItemModel;
 import com.kingpixel.cobbleutils.Model.PanelsConfig;
 import com.kingpixel.cobbleutils.util.AdventureTranslator;
+import com.kingpixel.cobbleutils.util.PlayerUtils;
 import com.kingpixel.ultrasts.UltraSTS;
 import com.kingpixel.ultrasts.configs.STSConf;
 import com.kingpixel.ultrasts.models.STS;
 import lombok.Data;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.List;
@@ -65,8 +69,7 @@ public class Menu {
         sts.applyTemplate(template, sts.getButton(action -> UltraSTS.lang.getStsCategoryMenu().open(player), 1, TimeUnit.SECONDS, 1));
       }
 
-
-      profile.applyTemplate(template, profile.getButton(action -> UltraSTS.lang.getProfileMenu().open(player), 1, TimeUnit.SECONDS, 1));
+      profile.applyTemplate(template, getProfileButton(player));
 
       GooeyPage page = GooeyPage.builder()
         .template(template)
@@ -74,5 +77,13 @@ public class Menu {
         .build();
       CobbleUtils.server.execute(() -> UIManager.openUIForcefully(player, page));
     });
+  }
+
+  private RateLimitedButton getProfileButton(ServerPlayerEntity player) {
+    RateLimitedButton profileButton = profile.getButton(action -> UltraSTS.lang.getProfileMenu().open(player), 1, TimeUnit.SECONDS, 1);
+    ItemStack headItem = PlayerUtils.getHeadItem(player);
+    headItem.applyComponentsFrom(profileButton.getDisplay().getComponents());
+    profileButton.setDisplay(headItem);
+    return profileButton;
   }
 }
