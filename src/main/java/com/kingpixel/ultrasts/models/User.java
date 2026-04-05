@@ -203,4 +203,9 @@ public class User {
   public void setDirty(boolean b) {
     getDirty().set(b);
   }
+
+  public void reset() {
+    cooldowns.clear();
+    markDirty();
+  }
 }

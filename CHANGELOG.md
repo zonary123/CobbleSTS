@@ -10,6 +10,7 @@
 - Added a **leaderboard**.
 - Added `%lorepokemon%` placeholder to the Pokémon lore in the language configuration, allowing full Pokémon lore to be
   displayed in the STS menu.
+  displayed in the STS menu.
 - Added **Multi-Selection System** for selling Pokémon:
     - Users can now select multiple Pokémon from their **Party** or **PC** boxes.
 
@@ -21,11 +22,15 @@
   `cooldownPermissions` per STS instead of a hardcoded 5-minute value.
 - Refactored `sellPokemon` to pass the player context, ensuring cooldown permissions are evaluated correctly at sell
   time.
+  `cooldownPermissions` per STS instead of a hardcoded 5-minute value.
+- Refactored `sellPokemon` to pass the player context, ensuring cooldown permissions are evaluated correctly at sell
+  time.
 
 ### Bug Fixes
 
 - Fixed the `/sts reload` command — it now requires **admin permission** (`ultrasts.admin`, level 2).
 - Fixed the leaderboard so it now displays the **ranking position correctly** — the position index was not incrementing
+  between entries.
   between entries.
 - Fixed the `/sts other` command permission level (corrected from level 4 to level 2).
 - Fixed cooldown permissions not being applied when selling a Pokémon.

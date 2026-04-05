@@ -253,7 +253,22 @@ public class STSSellMenu {
         if (selected.contains(pokemon)) {
           selected.remove(pokemon);
         } else {
-          selected.add(pokemon);
+          if (sts.isMultiSelect()) {
+            if (selected.size() >= sts.getMaxSelected()) {
+              PlayerUtils.sendMessage(
+                player,
+                UltraSTS.lang.getMaxSelectedMessage()
+                  .replace("%amount%", String.valueOf(sts.getMaxSelected())),
+                UltraSTS.lang.getPrefix(),
+                TypeMessage.CHAT
+              );
+              return;
+            }
+            selected.add(pokemon);
+          } else {
+            selected.clear();
+            selected.add(pokemon);
+          }
         }
         render(player, sts);
       })

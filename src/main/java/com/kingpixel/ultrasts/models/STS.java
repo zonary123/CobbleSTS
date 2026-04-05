@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class STS {
   private transient String id;
   private boolean multiSelect = true;
+  private int maxSelected = 6;
   @Builder.Default
   private ItemModel display = ItemModel.builder()
     .slot(1)

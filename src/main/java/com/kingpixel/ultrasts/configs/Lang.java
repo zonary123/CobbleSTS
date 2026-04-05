@@ -19,6 +19,7 @@ public class Lang {
   private String notificationSTSAvailable = "&aYou have some STS available!";
   private String notificationSelling = "%prefix% &6You are sold %pokemon% STS for %price%!";
   private String notificationSellingMulti = "%prefix% &6You sold %amount% Pokémon for %price%!";
+  private String maxSelectedMessage = "%prefix% &cYou can only select up to %amount% Pokemon in this STS!";
   private List<String> pokemonLore = List.of(
     "%lorepokemon%",
     "&7Sell this pokemon for STS!",
