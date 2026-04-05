@@ -189,6 +189,14 @@ public class STSSellMenu {
 
     confirmModel.applyTemplate(template, confirmModel.getButton(1, null, lore, action -> {
       if (selected.isEmpty()) return;
+      if (sts.isMultiSelect()) {
+        for (Pokemon p : selected) {
+          if (UltraSTS.config.isItemBanned(p)) {
+            PlayerUtils.sendMessage(player, UltraSTS.lang.getItemBannedMessage(), UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
+            return;
+          }
+        }
+      }
       handleSale(player, sts, selected);
     }, 1, TimeUnit.SECONDS, 1));
 

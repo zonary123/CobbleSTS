@@ -6,6 +6,9 @@
 
 ### Added
 
+- Added **Banned Items Check**:
+    - When **multi-selection** is enabled, the system now checks if any of the selected Pokémon are holding banned items before confirming the sale.
+    - Added `itemBannedMessage` to the language configuration.
 - Added the ability to configure **multiple STS**, where each STS can give a different **currency type and amount**.
 - Added a **leaderboard**.
 - Added `%lorepokemon%` placeholder to the Pokémon lore in the language configuration, allowing full Pokémon lore to be
