@@ -2,12 +2,23 @@
 
 **IMPORTANT:** Please test the changes listed below to ensure they work correctly.
 
+## [1.5.1] - 2026-05-10
+
+### Added
+
+- Added the `/sts other <player> <sts>` command, allowing admins to open another player's STS menu.
+- Added a button to clear all selected Pokémon in the multi-selection system.
+- Selected Pokémon are now automatically cleared when the STS menu is closed.
+    - This only removes the current selection state.
+    - Pokémon are **not** removed from the player's party or PC storage.
+
 ## [1.5.0] - 2026-03-11
 
 ### Added
 
 - Added **Banned Items Check**:
-    - When **multi-selection** is enabled, the system now checks if any of the selected Pokémon are holding banned items before confirming the sale.
+    - When **multi-selection** is enabled, the system now checks if any of the selected Pokémon are holding banned items
+      before confirming the sale.
     - Added `itemBannedMessage` to the language configuration.
 - Added the ability to configure **multiple STS**, where each STS can give a different **currency type and amount**.
 - Added a **leaderboard**.

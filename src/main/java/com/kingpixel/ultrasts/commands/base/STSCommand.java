@@ -2,8 +2,11 @@ package com.kingpixel.ultrasts.commands.base;
 
 import com.kingpixel.cobbleutils.api.PermissionApi;
 import com.kingpixel.ultrasts.UltraSTS;
+import com.kingpixel.ultrasts.configs.STSConf;
+import com.kingpixel.ultrasts.gui.STSMenu;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -21,15 +24,29 @@ public class STSCommand {
       }).then(
         CommandManager.literal("other")
           .then(
-            CommandManager.argument("player", StringArgumentType.string())
+            CommandManager.argument("player", EntityArgumentType.player())
               .requires(source -> PermissionApi.hasPermission(source, "ultrasts.admin", 2))
               .executes(context -> {
-                String targetName = StringArgumentType.getString(context, "player");
-                ServerPlayerEntity target = context.getSource().getServer().getPlayerManager().getPlayer(targetName);
+                ServerPlayerEntity target = EntityArgumentType.getPlayer(context, "player");
                 if (target == null) return 0;
                 UltraSTS.lang.getMenu().open(target);
                 return 1;
-              })
+              }).then(
+                CommandManager.argument("sts", StringArgumentType.string())
+                  .suggests((context, builder) -> {
+                    for (String sts : STSConf.STS_MAP.keySet()) {
+                      builder.suggest(sts);
+                    }
+                    return builder.buildFuture();
+                  })
+                  .executes(context -> {
+                    ServerPlayerEntity target = EntityArgumentType.getPlayer(context, "player");
+                    if (target == null) return 0;
+                    String sts = StringArgumentType.getString(context, "sts");
+                    STSMenu.open(target, STSConf.getSTS(sts));
+                    return 1;
+                  })
+              )
           )
       );
   }

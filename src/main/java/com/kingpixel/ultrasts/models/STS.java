@@ -25,7 +25,9 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 public class STS {
   private transient String id;
+  @Builder.Default
   private boolean multiSelect = true;
+  @Builder.Default
   private int maxSelected = 6;
   @Builder.Default
   private ItemModel display = ItemModel.builder()

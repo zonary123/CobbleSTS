@@ -42,7 +42,7 @@ public class STSMenu {
     }
 
     if (selectSTS.isMultiSelect()) {
-      UltraSTS.lang.getStsSellMenu().open(player, selectSTS);
+      UltraSTS.lang.getStsSellMenu().open(player, selectSTS, true);
       return CompletableFuture.completedFuture(null);
     }
 

@@ -32,10 +32,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.joml.Vector4f;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -45,6 +42,24 @@ public class STSSellMenu {
   private int rowsParty = 4;
   private String title = "&6STS Sell Menu";
   private List<Integer> partySlots = List.of(10, 11, 12, 13, 14, 15);
+
+  private ItemModel clearButtonPC = ItemModel.builder()
+    .slot(48)
+    .item("minecraft:red_concrete")
+    .displayname("&cClear Selection")
+    .lore(List.of(
+      "&7Click to clear your current selection"
+    ))
+    .build();
+
+  private ItemModel clearButtonParty = ItemModel.builder()
+    .slot(30)
+    .item("minecraft:red_concrete")
+    .displayname("&cClear Selection")
+    .lore(List.of(
+      "&7Click to clear your current selection"
+    ))
+    .build();
 
   private ItemModel confirmButtonPC = ItemModel.builder()
     .slot(53)
@@ -110,7 +125,7 @@ public class STSSellMenu {
 
   // State
   private transient Cache<String, UserSTSSession> sessions = Caffeine.newBuilder()
-    .expireAfterAccess(30, TimeUnit.MINUTES)
+    .expireAfterAccess(15, TimeUnit.MINUTES)
     .maximumSize(500)
     .build();
 
@@ -118,11 +133,13 @@ public class STSSellMenu {
     return uuid.toString() + ":" + stsId;
   }
 
-  public void open(ServerPlayerEntity player, STS sts) {
+  public void open(ServerPlayerEntity player, STS sts, boolean clear) {
     String key = getSessionKey(player.getUuid(), sts.getId());
     if (sessions.getIfPresent(key) == null) {
       sessions.put(key, new UserSTSSession(player.getUuid(), sts.getId()));
     }
+
+    if (clear) Objects.requireNonNull(sessions.getIfPresent(key)).clearSelection();
 
     render(player, sts);
   }
@@ -130,7 +147,7 @@ public class STSSellMenu {
   private void render(ServerPlayerEntity player, STS sts) {
     UserSTSSession session = sessions.getIfPresent(getSessionKey(player.getUuid(), sts.getId()));
     if (session == null) {
-      open(player, sts);
+      open(player, sts, true);
       return;
     }
     boolean isPC = session.isShowingPC();
@@ -147,6 +164,11 @@ public class STSSellMenu {
       displayPC(player, sts, template, selected, boxIdx);
       partyButton.applyTemplate(template, partyButton.getButton(action -> {
         session.setShowingPC(false);
+        render(player, sts);
+      }, 1, TimeUnit.SECONDS, 1));
+
+      clearButtonPC.applyTemplate(template, clearButtonPC.getButton(action -> {
+        session.clearSelection();
         render(player, sts);
       }, 1, TimeUnit.SECONDS, 1));
 
@@ -167,6 +189,11 @@ public class STSSellMenu {
       displayParty(player, sts, template, selected);
       pcButton.applyTemplate(template, pcButton.getButton(action -> {
         session.setShowingPC(true);
+        render(player, sts);
+      }, 1, TimeUnit.SECONDS, 1));
+
+      clearButtonParty.applyTemplate(template, clearButtonParty.getButton(action -> {
+        session.clearSelection();
         render(player, sts);
       }, 1, TimeUnit.SECONDS, 1));
 
