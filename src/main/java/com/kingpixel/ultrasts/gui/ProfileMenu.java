@@ -41,7 +41,7 @@ public class ProfileMenu {
       player.sendMessage(AdventureTranslator.toNative("&cAn error occurred while loading your profile. Please try again later."), false);
       return CompletableFuture.completedFuture(null);
     }
-    return UltraSTS.ASYNC.runAsync(() -> {
+    return UltraSTS.getAsyncContext().runAsync(() -> {
       ChestTemplate template = ChestTemplate.builder(rows)
         .build();
 

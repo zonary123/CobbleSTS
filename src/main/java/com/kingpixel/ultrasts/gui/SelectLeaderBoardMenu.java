@@ -30,7 +30,7 @@ public class SelectLeaderBoardMenu {
   private List<PanelsConfig> panels = List.of(new PanelsConfig());
 
   public CompletableFuture<Void> open(ServerPlayerEntity player) {
-    return UltraSTS.ASYNC.runAsync(() -> {
+    return UltraSTS.getAsyncContext().runAsync(() -> {
       ChestTemplate template = ChestTemplate.builder(rows)
         .build();
 

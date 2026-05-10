@@ -46,7 +46,7 @@ public class STSMenu {
       return CompletableFuture.completedFuture(null);
     }
 
-    return UltraSTS.ASYNC.runAsync(() -> UltraSTS.lang.getPartyPcMenu().openParty(
+    return UltraSTS.getAsyncContext().runAsync(() -> UltraSTS.lang.getPartyPcMenu().openParty(
       player,
       template -> {
       },

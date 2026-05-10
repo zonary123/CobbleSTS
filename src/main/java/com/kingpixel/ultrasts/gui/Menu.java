@@ -13,7 +13,6 @@ import com.kingpixel.ultrasts.UltraSTS;
 import com.kingpixel.ultrasts.configs.STSConf;
 import com.kingpixel.ultrasts.models.STS;
 import lombok.Data;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -46,7 +45,7 @@ public class Menu {
   private List<PanelsConfig> panels = List.of(new PanelsConfig());
 
   public CompletableFuture<Void> open(ServerPlayerEntity player) {
-    return UltraSTS.ASYNC.runAsync(() -> {
+    return UltraSTS.getAsyncContext().runAsync(() -> {
       ChestTemplate template = ChestTemplate.builder(rows)
         .build();
 

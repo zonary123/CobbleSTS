@@ -1,6 +1,7 @@
 package com.kingpixel.ultrasts;
 
 import com.kingpixel.cobbleutils.CobbleUtils;
+import com.kingpixel.cobbleutils.util.UtilsLogger;
 import com.kingpixel.cobbleutils.util.async.AsyncContext;
 import com.kingpixel.cobbleutils.util.async.UtilsAsync;
 import com.kingpixel.ultrasts.commands.Commands;
@@ -15,6 +16,7 @@ import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
 
@@ -26,16 +28,19 @@ public class UltraSTS implements ModInitializer {
   public static final String MOD_NAME = "UltraSTS";
   private static final Path PATH = CobbleUtils.getPath().resolve(MOD_ID);
   public static DatabaseClient database;
+  public static final Logger LOGGER = UtilsLogger.getLogger(MOD_ID);
 
   public static Config config;
   public static Lang lang;
+  
 
-
-  public static final AsyncContext ASYNC = UtilsAsync.createContext(MOD_ID, MOD_NAME, 1, 1);
+  public static AsyncContext getAsyncContext() {
+    return UtilsAsync.createContext(MOD_ID, MOD_NAME, 1, 1);
+  }
 
   @Override
   public void onInitialize() {
-    CobbleUtils.LOGGER.info(MOD_ID, "Initializing " + MOD_NAME);
+    LOGGER.info("Initializing UltraSTS...");
     events();
     reload();
   }
@@ -56,7 +61,7 @@ public class UltraSTS implements ModInitializer {
     PlayerEvent.PLAYER_JOIN.register(player -> database.findUser(player)
       .whenComplete((user, throwable) -> {
         if (throwable != null) {
-          throwable.printStackTrace();
+          LOGGER.error("An error occurred while loading user data for player " + player.getName().getString(), throwable);
           return;
         }
         if (user == null) user = new User(player);

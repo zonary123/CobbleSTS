@@ -29,14 +29,14 @@ public class JsonDatabaseClient extends DatabaseClient {
 
   @Override
   public CompletableFuture<@Nullable User> findUser(@NotNull UUID uuid) {
-    return UltraSTS.ASYNC.supply(() -> {
+    return UltraSTS.getAsyncContext().supply(() -> {
       User user = getUser(uuid);
       if (user != null) return user;
       Path path = PATH.resolve(uuid + ".json");
       try {
         return UtilsFile.read(path, User.class);
       } catch (Exception e) {
-        e.printStackTrace();
+        UltraSTS.LOGGER.error("Failed to find user: " + e.getMessage());
         return null;
       }
     });
@@ -44,12 +44,12 @@ public class JsonDatabaseClient extends DatabaseClient {
 
   @Override
   public CompletableFuture<Void> saveUser(@NotNull User user) {
-    return UltraSTS.ASYNC.runAsync(() -> {
+    return UltraSTS.getAsyncContext().runAsync(() -> {
       Path path = PATH.resolve(user.getUuid() + ".json");
       try {
         UtilsFile.write(path, user);
       } catch (Exception e) {
-        e.printStackTrace();
+        UltraSTS.LOGGER.error("Failed to save user: " + e.getMessage());
       }
     });
   }
@@ -63,13 +63,13 @@ public class JsonDatabaseClient extends DatabaseClient {
     try {
       var files = UtilsFile.getAllJsonFiles(PATH);
 
-      return UltraSTS.ASYNC.supply(() ->
+      return UltraSTS.getAsyncContext().supply(() ->
         files.stream()
           .map(path -> {
             try {
               return UtilsFile.read(path, User.class);
             } catch (Exception e) {
-              e.printStackTrace();
+              UltraSTS.LOGGER.error("Failed to read user file: " + e.getMessage());
               return null;
             }
           })
@@ -100,13 +100,13 @@ public class JsonDatabaseClient extends DatabaseClient {
 
     return CompletableFuture.allOf(
       users.stream()
-        .map(user -> UltraSTS.ASYNC.runAsync(() -> {
+        .map(user -> UltraSTS.getAsyncContext().runAsync(() -> {
           Path path = PATH.resolve(user.getUuid() + ".json");
           try {
             UtilsFile.write(path, user);
             user.setDirty(false);
           } catch (Exception e) {
-            e.printStackTrace();
+            UltraSTS.LOGGER.error("Failed to save user: " + e.getMessage());
           }
         }))
         .toArray(CompletableFuture[]::new)

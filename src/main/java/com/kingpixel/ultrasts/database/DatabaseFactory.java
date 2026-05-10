@@ -8,7 +8,7 @@ public class DatabaseFactory {
     return switch (UltraSTS.config.getDatabase().getType()) {
       case JSON -> new JsonDatabaseClient();
       case MONGODB -> new MongoDatabaseClient();
-      case SQLITE, MYSQL -> new SQLDatabaseClient();
+      case SQLITE, MARIADB, MYSQL, H2 -> new SQLDatabaseClient();
       default -> throw new IllegalStateException("Unexpected value: " + UltraSTS.config.getDatabase().getType());
     };
   }

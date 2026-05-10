@@ -1,7 +1,6 @@
 package com.kingpixel.ultrasts.gui;
 
 import ca.landonjw.gooeylibs2.api.UIManager;
-import ca.landonjw.gooeylibs2.api.button.GooeyButton;
 import ca.landonjw.gooeylibs2.api.button.RateLimitedButton;
 import ca.landonjw.gooeylibs2.api.page.GooeyPage;
 import ca.landonjw.gooeylibs2.api.template.types.ChestTemplate;
@@ -39,7 +38,7 @@ public class STSCategoryMenu {
       return CompletableFuture.completedFuture(null);
     }
 
-    return UltraSTS.ASYNC.runAsync(() -> {
+    return UltraSTS.getAsyncContext().runAsync(() -> {
       ChestTemplate template = ChestTemplate.builder(rows)
         .build();
 

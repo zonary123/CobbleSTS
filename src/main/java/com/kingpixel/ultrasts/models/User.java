@@ -70,7 +70,7 @@ public class User {
   }
 
   public CompletableFuture<Boolean> sellPokemon(STS sts, Pokemon pokemon, ServerPlayerEntity player) {
-    return UltraSTS.ASYNC.supply(() -> {
+    return UltraSTS.getAsyncContext().supply(() -> {
       synchronized (this) {
         if (hasCooldown(sts)) return false;
         BigDecimal price = BigDecimal.valueOf(sts.getFormula().getPokemonValue(pokemon));
@@ -92,7 +92,7 @@ public class User {
   }
 
   public CompletableFuture<BigDecimal> sellPokemons(STS sts, List<Pokemon> pokemons, ServerPlayerEntity player) {
-    return UltraSTS.ASYNC.supply(() -> {
+    return UltraSTS.getAsyncContext().supply(() -> {
       synchronized (this) {
         if (hasCooldown(sts)) return BigDecimal.ZERO;
 

@@ -2,27 +2,34 @@ package com.kingpixel.ultrasts.database;
 
 import com.google.gson.reflect.TypeToken;
 import com.kingpixel.cobbleutils.util.UtilsFile;
+import com.kingpixel.cobbleutils.util.sql.SQLManager;
+import com.kingpixel.cobbleutils.util.sql.SQLService;
 import com.kingpixel.ultrasts.UltraSTS;
+import com.kingpixel.ultrasts.database.sql.H2Queries;
+import com.kingpixel.ultrasts.database.sql.MySQLQueries;
+import com.kingpixel.ultrasts.database.sql.SQLQueries;
+import com.kingpixel.ultrasts.database.sql.SQLiteQueries;
 import com.kingpixel.ultrasts.models.STS;
 import com.kingpixel.ultrasts.models.User;
 import com.kingpixel.ultrasts.models.UserOptions;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class SQLDatabaseClient extends DatabaseClient {
 
-  private HikariDataSource dataSource;
+  private SQLManager sqlManager;
+  private SQLQueries sqlQueries;
 
   private static final Type MONEY_TYPE = new TypeToken<Map<String, BigDecimal>>() {
   }.getType();
@@ -33,134 +40,170 @@ public class SQLDatabaseClient extends DatabaseClient {
   public void connect() {
     var config = UltraSTS.config.getDatabase();
 
-    HikariConfig hikari = new HikariConfig();
-    hikari.setJdbcUrl(config.getUrl());
-    hikari.setUsername(config.getUser());
-    hikari.setPassword(config.getPassword());
-    hikari.setPoolName("UltraSTS-Pool");
-    hikari.setMaximumPoolSize(10);
+    sqlManager = SQLService.getOrCreateManager(config);
+    sqlQueries = switch (config.getType()) {
+      case SQLITE -> new SQLiteQueries();
+      case MYSQL -> new MySQLQueries();
+      case MARIADB -> new MySQLQueries();
+      case H2 -> new H2Queries();
+      default -> throw new IllegalStateException("Unexpected value: " + config.getType());
+    };
 
-    dataSource = new HikariDataSource(hikari);
-
-    String createTableSQL = """
-          CREATE TABLE IF NOT EXISTS users (
-              uuid CHAR(36) NOT NULL PRIMARY KEY,
-              username VARCHAR(32) NOT NULL,
-              options TEXT NOT NULL,
-              money_gained TEXT NOT NULL,
-              cooldowns TEXT NOT NULL,
-              INDEX idx_username (username)
-          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-      """;
-
-    try (Connection conn = dataSource.getConnection();
-         PreparedStatement ps = conn.prepareStatement(createTableSQL)) {
-      ps.execute();
+    try {
+      sqlManager.execute(sqlQueries.createTable());
+      sqlManager.execute(sqlQueries.createIndex());
     } catch (Exception e) {
-      e.printStackTrace();
+      UltraSTS.LOGGER.error("Failed to create users table", e);
     }
   }
 
   @Override
   public void disconnect() {
     try {
-      saveAll().join();
+      saveAll().get(30, TimeUnit.SECONDS);
     } catch (Exception e) {
-      e.printStackTrace();
+      UltraSTS.LOGGER.error("Failed to save all users during shutdown", e);
     }
-    if (dataSource != null) dataSource.close();
   }
 
   @Override
   public CompletableFuture<@Nullable User> findUser(@NotNull UUID uuid) {
-    return UltraSTS.ASYNC.supply(() -> {
-      User cached = getUser(uuid);
-      if (cached != null) return cached;
+    User cached = getUser(uuid);
 
-      try (Connection conn = dataSource.getConnection();
-           PreparedStatement ps = conn.prepareStatement("SELECT * FROM users WHERE uuid = ?")) {
+    if (cached != null) {
+      return CompletableFuture.completedFuture(cached);
+    }
 
-        ps.setString(1, uuid.toString());
-
-        try (ResultSet rs = ps.executeQuery()) {
-          if (!rs.next()) return null;
-          return parseUser(rs);
+    return sqlManager.queryAsync(
+      sqlQueries.findUserByUUID(),
+      rs -> {
+        if (!rs.next()) {
+          return null;
         }
 
+        try {
+          return parseUser(rs);
+        } catch (Exception e) {
+          UltraSTS.LOGGER.error(
+            "Failed to parse user {} from database",
+            uuid,
+            e
+          );
+          return null;
+        }
+      },
+      uuid.toString()
+    );
+  }
+
+  @Override
+  public CompletableFuture<Void> saveUser(@NotNull User user) {
+    return sqlManager.withConnectionAsync(conn -> {
+      try (PreparedStatement ps = conn.prepareStatement(sqlQueries.upsertUser())) {
+
+        bindUser(ps, user);
+
+        ps.executeUpdate();
+
+        user.setDirty(false);
+
       } catch (Exception e) {
-        e.printStackTrace();
-        return null;
+        UltraSTS.LOGGER.error(
+          "Failed to save user {}",
+          user.getUuid(),
+          e
+        );
       }
     });
   }
 
   @Override
-  public CompletableFuture<Void> saveUser(@NotNull User user) {
-    return UltraSTS.ASYNC.runAsync(() -> {
-      String sql = """
-        INSERT INTO users (uuid, username, options, money_gained, cooldowns)
-        VALUES (?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE
-            username = VALUES(username),
-            options = VALUES(options),
-            money_gained = VALUES(money_gained),
-            cooldowns = VALUES(cooldowns)
-        """;
+  public CompletableFuture<Void> saveAll() {
+    List<User> users = getSavableUsers();
 
-      try (Connection conn = dataSource.getConnection();
-           PreparedStatement ps = conn.prepareStatement(sql)) {
+    if (users.isEmpty()) {
+      return CompletableFuture.completedFuture(null);
+    }
 
-        ps.setString(1, user.getUuid().toString());
-        ps.setString(2, user.getUsername());
-        ps.setString(3, UtilsFile.getGson().toJson(user.getOptions()));
-        ps.setString(4, UtilsFile.getGson().toJson(user.getMoneyGained()));
-        ps.setString(5, UtilsFile.getGson().toJson(user.getCooldowns()));
+    return sqlManager.withConnectionAsync(conn -> {
+      try (PreparedStatement ps = conn.prepareStatement(sqlQueries.upsertUser())) {
 
-        ps.executeUpdate();
-        user.setDirty(false);
+        for (User user : users) {
+          bindUser(ps, user);
+          ps.addBatch();
+        }
+
+        ps.executeBatch();
+
+        users.forEach(user -> user.setDirty(false));
 
       } catch (Exception e) {
-        e.printStackTrace();
+        UltraSTS.LOGGER.error("Failed to save users batch", e);
       }
     });
   }
 
   @Override
   public CompletableFuture<List<User>> findTopUsers(int limit, int page, STS sts) {
-    return UltraSTS.ASYNC.supply(() -> {
-      List<User> list = new ArrayList<>();
 
-      try (Connection conn = dataSource.getConnection();
-           PreparedStatement ps = conn.prepareStatement("SELECT * FROM users")) {
+    int safeLimit = Math.max(1, limit);
+    int safePage = Math.max(1, page);
 
-        try (ResultSet rs = ps.executeQuery()) {
-          while (rs.next()) {
-            list.add(parseUser(rs));
-          }
+    int offset = (safePage - 1) * safeLimit;
+
+    String jsonPath = "$.\"" + sts.getId() + "\"";
+
+    return sqlManager.queryListAsync(
+      sqlQueries.findTopUsers(),
+      rs -> {
+        try {
+          return parseUser(rs);
+        } catch (Exception e) {
+          UltraSTS.LOGGER.error(
+            "Failed to parse leaderboard user for STS {}",
+            sts.getId(),
+            e
+          );
+
+          return null;
         }
+      },
+      jsonPath,
+      jsonPath,
+      safeLimit,
+      offset
+    ).thenApply(users ->
+      users.stream()
+        .filter(java.util.Objects::nonNull)
+        .toList()
+    );
+  }
 
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+  private void bindUser(PreparedStatement ps, User user) throws Exception {
 
-      // Ordenar en Java según money_gained
-      list.removeIf(user -> !user.getMoneyGained().containsKey(sts.getId()));
-      list.sort((u1, u2) -> u2.getMoneyGained()
-        .getOrDefault(sts.getId(), BigDecimal.ZERO)
-        .compareTo(u1.getMoneyGained().getOrDefault(sts.getId(), BigDecimal.ZERO)));
+    ps.setString(1, user.getUuid().toString());
+    ps.setString(2, user.getUsername());
 
-      int safeLimit = Math.max(1, limit);
-      int safePage = Math.max(1, page);
-      int fromIndex = (safePage - 1) * safeLimit;
-      int toIndex = Math.min(fromIndex + safeLimit, list.size());
+    ps.setString(
+      3,
+      UtilsFile.getGson().toJson(user.getOptions())
+    );
 
-      if (fromIndex >= list.size()) return Collections.emptyList();
-      return list.subList(fromIndex, toIndex);
-    });
+    ps.setString(
+      4,
+      UtilsFile.getGson().toJson(user.getMoneyGained())
+    );
+
+    ps.setString(
+      5,
+      UtilsFile.getGson().toJson(user.getCooldowns())
+    );
   }
 
   private User parseUser(ResultSet rs) throws Exception {
+
     UUID uuid = UUID.fromString(rs.getString("uuid"));
+
     String username = rs.getString("username");
 
     UserOptions options = UtilsFile.getGson().fromJson(
@@ -181,47 +224,15 @@ public class SQLDatabaseClient extends DatabaseClient {
     return User.builder()
       .uuid(uuid)
       .username(username)
-      .options(options != null ? options : new UserOptions())
-      .moneyGained(money != null ? new ConcurrentHashMap<>(money) : new ConcurrentHashMap<>())
-      .cooldowns(cooldowns != null ? new ConcurrentHashMap<>(cooldowns) : new ConcurrentHashMap<>())
+      .options(options != null
+        ? options
+        : new UserOptions())
+      .moneyGained(money != null
+        ? new ConcurrentHashMap<>(money)
+        : new ConcurrentHashMap<>())
+      .cooldowns(cooldowns != null
+        ? new ConcurrentHashMap<>(cooldowns)
+        : new ConcurrentHashMap<>())
       .build();
-  }
-
-  @Override
-  public CompletableFuture<Void> saveAll() {
-    var users = getSavableUsers();
-    if (users.isEmpty()) return CompletableFuture.completedFuture(null);
-
-    return UltraSTS.ASYNC.runAsync(() -> {
-      String sql = """
-        INSERT INTO users (uuid, username, options, money_gained, cooldowns)
-        VALUES (?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE
-            username = VALUES(username),
-            options = VALUES(options),
-            money_gained = VALUES(money_gained),
-            cooldowns = VALUES(cooldowns)
-        """;
-
-      try (Connection conn = dataSource.getConnection();
-           PreparedStatement ps = conn.prepareStatement(sql)) {
-
-        for (User user : users) {
-          ps.setString(1, user.getUuid().toString());
-          ps.setString(2, user.getUsername());
-          ps.setString(3, UtilsFile.getGson().toJson(user.getOptions()));
-          ps.setString(4, UtilsFile.getGson().toJson(user.getMoneyGained()));
-          ps.setString(5, UtilsFile.getGson().toJson(user.getCooldowns()));
-          ps.addBatch();
-
-          user.setDirty(false);
-        }
-
-        ps.executeBatch();
-
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    });
   }
 }

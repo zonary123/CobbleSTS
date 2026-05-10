@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class TaskNotification {
   public static void register() {
     var notification = UltraSTS.config.getNotificationCooldown().toMillis();
-    UltraSTS.ASYNC.scheduleAtFixedRate(() -> {
+    UltraSTS.getAsyncContext().scheduleAtFixedRate(() -> {
       var users = DatabaseClient.USERS.asMap().values();
       for (User user : users) {
         if (!user.getOptions().isNotificationsEnabled()) continue;
