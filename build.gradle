@@ -69,9 +69,6 @@ repositories {
     maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots"; name = "Sonatype 01 Snapshots" }
 }
 
-tasks.named("build") {
-    dependsOn tasks.named("apiJar")
-}
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -152,26 +149,6 @@ jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}" }
     }
-}
-// Tarea para generar un JAR de API solo con ciertos paquetes
-tasks.register("apiJar", Jar) {
-    archiveClassifier.set("api") // Será modname-api-version.jar
-
-    // Tomamos los archivos compilados del mod principal
-    from(sourceSets.main.output) {
-        // Solo incluir los paquetes que quieres exponer
-        include "com/kingpixel/ultrabattlepass/api/**"
-        include "com/kingpixel/ultrabattlepass/models/tasks/*"
-        include "com/kingpixel/ultrabattlepass/models/filters/*"
-    }
-
-    // Incluir LICENSE opcionalmente
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
-    }
-
-    // Depende de que el mod principal esté compilado
-    dependsOn tasks.named("classes")
 }
 
 publishing {
