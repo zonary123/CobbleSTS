@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class JsonDatabaseClient extends DatabaseClient {
   private static Path PATH;
@@ -24,7 +25,11 @@ public class JsonDatabaseClient extends DatabaseClient {
 
   @Override
   public void disconnect() {
-    saveAll().join();
+    try {
+      saveAll().get(5, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      UltraSTS.LOGGER.error("Error al guardar todos los usuarios en disconnect", e);
+    }
   }
 
   @Override

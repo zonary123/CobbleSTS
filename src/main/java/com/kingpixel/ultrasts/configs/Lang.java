@@ -22,10 +22,9 @@ public class Lang {
   private String maxSelectedMessage = "%prefix% &cYou can only select up to %amount% Pokemon in this STS!";
   private String itemBannedMessage = "%prefix% &cOne or more selected Pokemon have a banned item!";
   private List<String> pokemonLore = List.of(
-    "%lorepokemon%",
-    "&7Sell this pokemon for STS!",
-    "&7Value: %price% STS"
-  );
+      "%lorepokemon%",
+      "&7Sell this pokemon for STS!",
+      "&7Value: %price% STS");
   // GUI
   private Menu menu = new Menu();
   private STSCategoryMenu stsCategoryMenu = new STSCategoryMenu();
@@ -41,7 +40,8 @@ public class Lang {
     Path file = UltraSTS.getPath().resolve("lang").resolve(language + ".json");
     try {
       Lang lang = UtilsFile.read(file, Lang.class);
-      if (lang == null) lang = new Lang();
+      if (lang == null)
+        lang = new Lang();
       lang.fix();
       UltraSTS.lang = lang;
       UtilsFile.writeAsync(file, lang);

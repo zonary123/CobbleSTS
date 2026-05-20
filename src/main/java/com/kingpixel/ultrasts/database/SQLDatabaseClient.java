@@ -60,9 +60,9 @@ public class SQLDatabaseClient extends DatabaseClient {
   @Override
   public void disconnect() {
     try {
-      saveAll().get(30, TimeUnit.SECONDS);
+      saveAll().get(5, TimeUnit.SECONDS);
     } catch (Exception e) {
-      UltraSTS.LOGGER.error("Failed to save all users during shutdown", e);
+      UltraSTS.LOGGER.error("Error al guardar todos los usuarios en disconnect", e);
     }
   }
 
