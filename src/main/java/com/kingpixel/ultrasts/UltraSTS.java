@@ -32,7 +32,6 @@ public class UltraSTS implements ModInitializer {
 
   public static Config config;
   public static Lang lang;
-  
 
   public static AsyncContext getAsyncContext() {
     return UtilsAsync.createContext(MOD_ID, MOD_NAME, 1, 1);
@@ -47,6 +46,17 @@ public class UltraSTS implements ModInitializer {
 
   public static void reload() {
     files();
+ 
+    // CORRECCIÓN: Evita fugas de memoria y conexiones duplicadas al hacer /reload
+    if (database != null) {
+      try {
+        LOGGER.info("Closing existing database connection before reloading...");
+        database.disconnect();
+      } catch (Exception e) {
+        LOGGER.error("Error closing old database client during reload", e);
+      }
+    }
+
     database = DatabaseFactory.init();
     database.connect();
   }
@@ -71,27 +81,37 @@ public class UltraSTS implements ModInitializer {
       })
     );
 
+    // CORRECCIÓN: Espera a que termine el guardado asíncrono ANTES de borrar la caché
     PlayerEvent.PLAYER_QUIT.register(player -> {
       User user = database.getUser(player);
       if (user != null) {
-        user.save();
-        DatabaseClient.USERS.invalidate(player.getUuid());
+        user.save().whenComplete((v, throwable) -> {
+          if (throwable != null) {
+            LOGGER.error("An error occurred while saving data for quitting player: " + player.getName().getString(), throwable);
+          }
+          // Se invalida de la caché local únicamente cuando el guardado fue exitoso
+          DatabaseClient.USERS.invalidate(player.getUuid());
+        });
       }
     });
 
     LifecycleEvent.SERVER_STARTED.register(evt -> Tasks.register());
 
-    LifecycleEvent.SERVER_STOPPING.register(server -> database.disconnect());
+    // NOTA: Aquí se llama al .join() interno de disconnect(), deteniendo el hilo de
+    // Minecraft el tiempo justo y necesario para asegurar que ningún dato se pierda en el apagado.
+    LifecycleEvent.SERVER_STOPPING.register(server -> {
+      if (database != null) {
+        LOGGER.info("Saving all pending data and disconnecting from database...");
+        database.disconnect();
+      }
+    });
 
     CommandRegistrationCallback.EVENT.register((dispatcher, access, env) -> {
       Commands.register(dispatcher);
     });
-
-
   }
 
   public static Path getPath() {
     return PATH;
   }
-
 }

@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class MongoDatabaseClient extends DatabaseClient {
   private MongoCollection<Document> usersCollection;
@@ -33,16 +32,6 @@ public class MongoDatabaseClient extends DatabaseClient {
     var config = UltraSTS.config.getDatabase();
 
     usersCollection = getMongoDBManager().getCollection(config.getDatabase(), "users");
-  }
-
-
-  @Override
-  public void disconnect() {
-    try {
-      saveAll().get(5, TimeUnit.SECONDS);
-    } catch (Exception e) {
-      UltraSTS.LOGGER.error("Error al guardar todos los usuarios en disconnect", e);
-    }
   }
 
   @Override
@@ -66,19 +55,46 @@ public class MongoDatabaseClient extends DatabaseClient {
   @Override
   public CompletableFuture<Void> saveUser(@NotNull User user) {
     return getMongoDBManager().runAsync(() -> {
-      Document doc = user.toDocument();
-      usersCollection.replaceOne(new Document("uuid", user.getUuid().toString()), doc, new ReplaceOptions().upsert(true));
+      try {
+        Document doc = user.toDocument();
+        usersCollection.replaceOne(new Document("uuid", user.getUuid().toString()), doc, new ReplaceOptions().upsert(true));
+
+        // Mark user as clean after successful save
+        user.setDirty(false);
+
+        // Invalidate leaderboard cache since this user's data changed
+        invalidateAllLeaderboardCache();
+      } catch (Exception e) {
+        UltraSTS.LOGGER.error("Failed to save mongo user " + user.getUuid(), e);
+      }
     });
   }
 
   @Override
-  public CompletableFuture<List<User>> findTopUsers(int limit, int page, STS sts) {
-    return getMongoDBManager().supplyAsync(() -> usersCollection.find()
-      .sort(new Document("moneyGained." + sts.getId(), -1))
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .map(User::fromDocument)
-      .into(new ArrayList<>()));
+  public CompletableFuture<List<User>> findTopUsersImpl(int limit, int page, STS sts) {
+    return getMongoDBManager().supplyAsync(() -> {
+      try {
+        return usersCollection.find()
+          .sort(new Document("moneyGained." + sts.getId(), -1))
+          .skip((page - 1) * limit)
+          .limit(limit)
+          .map(doc -> {
+            try {
+              return User.fromDocument(doc);
+            } catch (Exception e) {
+              UltraSTS.LOGGER.warn("Failed to parse user document from MongoDB: {}", e.getMessage());
+              return null;
+            }
+          })
+          .into(new ArrayList<>())
+          .stream()
+          .filter(user -> user != null)
+          .toList();
+      } catch (Exception e) {
+        UltraSTS.LOGGER.error("Error querying top users from MongoDB for STS {}", sts.getId(), e);
+        return new ArrayList<>();
+      }
+    });
   }
 
   @Override
@@ -87,17 +103,25 @@ public class MongoDatabaseClient extends DatabaseClient {
     if (users.isEmpty()) return CompletableFuture.completedFuture(null);
 
     return getMongoDBManager().runAsync(() -> {
-      var bulkOperations = users.stream()
-        .map(user -> new ReplaceOneModel<>(
-          new Document("uuid", user.getUuid().toString()),
-          user.toDocument(),
-          new ReplaceOptions().upsert(true)
-        ))
-        .toList();
+      try {
+        var bulkOperations = users.stream()
+          .map(user -> new ReplaceOneModel<>(
+            new Document("uuid", user.getUuid().toString()),
+            user.toDocument(),
+            new ReplaceOptions().upsert(true)
+          ))
+          .toList();
 
-      usersCollection.bulkWrite(bulkOperations);
+        usersCollection.bulkWrite(bulkOperations);
 
-      users.forEach(user -> user.setDirty(false));
+        // Only mark as clean if bulk write succeeds
+        users.forEach(user -> user.setDirty(false));
+
+        // Invalidate leaderboard cache after bulk save
+        invalidateAllLeaderboardCache();
+      } catch (Exception e) {
+        UltraSTS.LOGGER.error("Failed to bulk save users into MongoDB", e);
+      }
     });
   }
 }

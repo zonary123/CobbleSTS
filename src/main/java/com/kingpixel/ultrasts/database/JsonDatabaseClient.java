@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class JsonDatabaseClient extends DatabaseClient {
   private static Path PATH;
@@ -21,15 +20,6 @@ public class JsonDatabaseClient extends DatabaseClient {
   public void connect() {
     PATH = UltraSTS.getPath().resolve("users");
     PATH.toFile().mkdirs();
-  }
-
-  @Override
-  public void disconnect() {
-    try {
-      saveAll().get(5, TimeUnit.SECONDS);
-    } catch (Exception e) {
-      UltraSTS.LOGGER.error("Error al guardar todos los usuarios en disconnect", e);
-    }
   }
 
   @Override
@@ -53,6 +43,10 @@ public class JsonDatabaseClient extends DatabaseClient {
       Path path = PATH.resolve(user.getUuid() + ".json");
       try {
         UtilsFile.write(path, user);
+        user.setDirty(false);
+
+        // Invalidate leaderboard cache since this user's data changed
+        invalidateAllLeaderboardCache();
       } catch (Exception e) {
         UltraSTS.LOGGER.error("Failed to save user: " + e.getMessage());
       }
@@ -60,40 +54,43 @@ public class JsonDatabaseClient extends DatabaseClient {
   }
 
   @Override
-  public CompletableFuture<List<User>> findTopUsers(int limit, int page, STS sts) {
+  public CompletableFuture<List<User>> findTopUsersImpl(int limit, int page, STS sts) {
     int safeLimit = Math.max(1, limit);
     int safePage = Math.max(1, page);
     long skip = (long) (safePage - 1) * safeLimit;
 
     try {
-      var files = UtilsFile.getAllJsonFiles(PATH);
-
-      return UltraSTS.getAsyncContext().supply(() ->
-        files.stream()
-          .map(path -> {
-            try {
-              return UtilsFile.read(path, User.class);
-            } catch (Exception e) {
-              UltraSTS.LOGGER.error("Failed to read user file: " + e.getMessage());
-              return null;
-            }
-          })
-          .filter(user -> user != null &&
-            user.getMoneyGained().containsKey(sts.getId()))
-          .sorted((u1, u2) -> {
-            BigDecimal money1 = u1.getMoneyGained()
-              .getOrDefault(sts.getId(), BigDecimal.ZERO);
-            BigDecimal money2 = u2.getMoneyGained()
-              .getOrDefault(sts.getId(), BigDecimal.ZERO);
-            return money2.compareTo(money1);
-          })
-          .skip(skip)
-          .limit(safeLimit)
-          .toList()
-      );
+      // Process all files asynchronously to avoid blocking the server thread
+      return UltraSTS.getAsyncContext().supply(() -> {
+        try {
+          var files = UtilsFile.getAllJsonFiles(PATH);
+          return files.stream()
+            .map(path -> {
+              try {
+                return UtilsFile.read(path, User.class);
+              } catch (Exception e) {
+                UltraSTS.LOGGER.warn("Failed to read user file {}: {}", path.getFileName(), e.getMessage());
+                return null;
+              }
+            })
+            .filter(user -> user != null && user.getMoneyGained() != null)
+            .filter(user -> user.getMoneyGained().containsKey(sts.getId()))
+            .sorted((u1, u2) -> {
+              BigDecimal money1 = u1.getMoneyGained().getOrDefault(sts.getId(), BigDecimal.ZERO);
+              BigDecimal money2 = u2.getMoneyGained().getOrDefault(sts.getId(), BigDecimal.ZERO);
+              return money2.compareTo(money1);
+            })
+            .skip(skip)
+            .limit(safeLimit)
+            .toList();
+        } catch (Exception e) {
+          UltraSTS.LOGGER.error("Error processing top users async for STS {}: {}", sts.getId(), e.getMessage());
+          return List.of();
+        }
+      });
 
     } catch (Exception e) {
-      e.printStackTrace();
+      UltraSTS.LOGGER.error("Error in findTopUsersImpl for STS {}: {}", sts.getId(), e.getMessage());
       return CompletableFuture.completedFuture(List.of());
     }
   }
@@ -115,6 +112,6 @@ public class JsonDatabaseClient extends DatabaseClient {
           }
         }))
         .toArray(CompletableFuture[]::new)
-    );
+    ).thenRun(this::invalidateAllLeaderboardCache); // Invalidate cache after all users saved
   }
 }

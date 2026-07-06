@@ -2,6 +2,40 @@
 
 **IMPORTANT:** Please test the changes listed below to ensure they work correctly.
 
+## [1.5.4] - 2026-07-06
+
+### Fixed
+
+- Fixed a crash during SQL database initialization where MySQL/MariaDB connections threw `SQL String cannot be empty` because index queries were empty (now checks if query is blank/empty before executing).
+
+## [1.5.3] - 2026-06-18
+
+### Added
+
+- Added **leaderboard caching with 45-second TTL** for improved performance across all database types.
+    - Cache is automatically invalidated when user data is saved.
+    - Significantly reduces load on MongoDB, JSON file system, and SQL databases.
+
+### Improved
+
+- **Leaderboard rendering**: Added null-safety checks to prevent crashes from corrupted user data.
+- **MongoDB leaderboard**: Improved error handling with try-catch in document conversion and better logging.
+- **JSON leaderboard**: Added null validation for corrupted files and improved async processing for large user datasets.
+- **SQL leaderboard**: Changed error level to WARN for parse failures to reduce log noise during normal operations.
+- **Error handling**: All backend database clients now log warnings instead of errors for recoverable parsing failures.
+
+### Bug Fixes
+
+- Fixed potential NullPointerException in leaderboard menu when rendering corrupted user data.
+- Fixed leaderboard cache not being invalidated after batch user saves.
+- Fixed potential crash in LeaderBoardMenu.getButton() when moneyEarned data is missing.
+- Fixed JSON database client filtering out users with null moneyGained map.
+
+### Changed
+
+- Leaderboard queries now use centralized caching layer to reduce database load.
+- Cache invalidation is now automatic on all user save operations (single and batch).
+
 ## [1.5.1] - 2026-05-10
 
 ### Added

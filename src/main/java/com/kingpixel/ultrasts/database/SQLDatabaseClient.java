@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 public class SQLDatabaseClient extends DatabaseClient {
 
@@ -50,19 +49,16 @@ public class SQLDatabaseClient extends DatabaseClient {
     };
 
     try {
-      sqlManager.execute(sqlQueries.createTable());
-      sqlManager.execute(sqlQueries.createIndex());
+      String tableQuery = sqlQueries.createTable();
+      if (tableQuery != null && !tableQuery.isBlank()) {
+        sqlManager.execute(tableQuery);
+      }
+      String indexQuery = sqlQueries.createIndex();
+      if (indexQuery != null && !indexQuery.isBlank()) {
+        sqlManager.execute(indexQuery);
+      }
     } catch (Exception e) {
       UltraSTS.LOGGER.error("Failed to create users table", e);
-    }
-  }
-
-  @Override
-  public void disconnect() {
-    try {
-      saveAll().get(5, TimeUnit.SECONDS);
-    } catch (Exception e) {
-      UltraSTS.LOGGER.error("Error al guardar todos los usuarios en disconnect", e);
     }
   }
 
@@ -107,6 +103,9 @@ public class SQLDatabaseClient extends DatabaseClient {
 
         user.setDirty(false);
 
+        // Invalidate leaderboard cache since user data changed
+        invalidateAllLeaderboardCache();
+
       } catch (Exception e) {
         UltraSTS.LOGGER.error(
           "Failed to save user {}",
@@ -125,6 +124,7 @@ public class SQLDatabaseClient extends DatabaseClient {
       return CompletableFuture.completedFuture(null);
     }
 
+    // Use native JDBC batch processing which is extremely efficient
     return sqlManager.withConnectionAsync(conn -> {
       try (PreparedStatement ps = conn.prepareStatement(sqlQueries.upsertUser())) {
 
@@ -137,6 +137,9 @@ public class SQLDatabaseClient extends DatabaseClient {
 
         users.forEach(user -> user.setDirty(false));
 
+        // Invalidate leaderboard cache after bulk save
+        invalidateAllLeaderboardCache();
+
       } catch (Exception e) {
         UltraSTS.LOGGER.error("Failed to save users batch", e);
       }
@@ -144,7 +147,7 @@ public class SQLDatabaseClient extends DatabaseClient {
   }
 
   @Override
-  public CompletableFuture<List<User>> findTopUsers(int limit, int page, STS sts) {
+  public CompletableFuture<List<User>> findTopUsersImpl(int limit, int page, STS sts) {
 
     int safeLimit = Math.max(1, limit);
     int safePage = Math.max(1, page);
@@ -159,7 +162,7 @@ public class SQLDatabaseClient extends DatabaseClient {
         try {
           return parseUser(rs);
         } catch (Exception e) {
-          UltraSTS.LOGGER.error(
+          UltraSTS.LOGGER.warn(
             "Failed to parse leaderboard user for STS {}",
             sts.getId(),
             e

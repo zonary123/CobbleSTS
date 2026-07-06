@@ -18,6 +18,7 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.server.network.ServerPlayerEntity;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -60,7 +61,7 @@ public class LeaderBoardMenu {
   public CompletableFuture<Void> open(ServerPlayerEntity player, STS value, int numPage) {
     return UltraSTS.database.findTopUsers(rectangle.getTotalSlots(), numPage, value)
       .exceptionally(e -> {
-        e.printStackTrace();
+        UltraSTS.LOGGER.error("Failed to load leaderboard for STS: {}", value.getId(), e);
         return null;
       })
       .thenCompose((users) -> {
@@ -69,6 +70,16 @@ public class LeaderBoardMenu {
             .build();
 
           PanelsConfig.applyConfig(template, panels);
+
+          // Validate users list is not null and filter out any null entries
+          if (users == null) {
+            users = new ArrayList<>();
+          } else {
+            users = users.stream()
+              .filter(user -> user != null && user.getMoneyGained() != null)
+              .toList();
+          }
+
           int index = numPage * rectangle.getTotalSlots() + 1;
           List<GooeyButton> buttons = new ArrayList<>();
           for (User user : users) {
@@ -95,22 +106,29 @@ public class LeaderBoardMenu {
           CobbleUtils.server.execute(() -> UIManager.openUIForcefully(player, page));
           return null;
         } catch (Exception e) {
-          e.printStackTrace();
+          UltraSTS.LOGGER.error("Error rendering leaderboard menu", e);
           return null;
         }
       });
   }
 
   private GooeyButton getButton(User user, int index, STS value) {
-    String displayName = user.getUsername()
+    String username = user.getUsername() != null ? user.getUsername() : "Unknown";
+    BigDecimal moneyEarned = user.getMoneyGained() != null && user.getMoneyGained().containsKey(value.getId())
+      ? user.getMoneyGained().get(value.getId())
+      : BigDecimal.ZERO;
+
+    String displayName = username
       .replace("%rank%", String.valueOf(index))
-      .replace("%username%", user.getUsername())
-      .replace("%money_earned%", String.valueOf(user.getMoneyEarned(value)));
+      .replace("%username%", username)
+      .replace("%money_earned%", moneyEarned.toPlainString());
+
     List<String> lore = new ArrayList<>(getUser().getLore());
     lore.replaceAll(s -> s
       .replace("%rank%", String.valueOf(index))
-      .replace("%username%", user.getUsername())
-      .replace("%money_earned%", String.valueOf(user.getMoneyEarned(value))));
+      .replace("%username%", username)
+      .replace("%money_earned%", moneyEarned.toPlainString()));
+
     return GooeyButton.builder()
       .display(PlayerUtils.getHeadItem(user.getUuid()))
       .with(DataComponentTypes.CUSTOM_NAME, AdventureTranslator.toNative(displayName))
