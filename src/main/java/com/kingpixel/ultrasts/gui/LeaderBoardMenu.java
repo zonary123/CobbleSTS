@@ -113,7 +113,7 @@ public class LeaderBoardMenu {
   }
 
   private GooeyButton getButton(User user, int index, STS value) {
-    String username = user.getUsername() != null ? user.getUsername() : "Unknown";
+    String username = user.getUsername() != null ? user.getUsername() : UltraSTS.lang.getUnknownUser();
     BigDecimal moneyEarned = user.getMoneyGained() != null && user.getMoneyGained().containsKey(value.getId())
       ? user.getMoneyGained().get(value.getId())
       : BigDecimal.ZERO;

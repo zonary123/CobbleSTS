@@ -67,11 +67,18 @@ public class STS {
     );
     return display.getButton(1, null, lore, action -> {
       if (!user.hasPermission(player, this)) {
-        PlayerUtils.sendMessage(player, "&cYou do not have permission to enter this STS category!", UltraSTS.lang.getPrefix());
+        PlayerUtils.sendMessage(player, UltraSTS.lang.getNoPermissionCategory().replace("%permission%", getPermissionRequired()), UltraSTS.lang.getPrefix());
         return;
       }
       STSMenu.open(player, this);
     }, 1, TimeUnit.SECONDS, 1);
+  }
+
+  public String getPermissionRequired() {
+    if (permission != null && !permission.isEmpty()) {
+      return permission;
+    }
+    return "ultrasts.join." + id;
   }
 
   public boolean isBlackListed(Pokemon pokemon) {

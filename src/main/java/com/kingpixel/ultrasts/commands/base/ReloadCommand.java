@@ -18,7 +18,7 @@ public class ReloadCommand {
             UltraSTS.reload();
             context.getSource().sendMessage(
               Text.literal(
-                "UltraSTS reloaded successfully!"
+                UltraSTS.lang.getReloadSuccess()
               )
             );
             return 1;

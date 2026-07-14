@@ -333,7 +333,7 @@ public class STSSellMenu {
     List<Pokemon> toSell = new ArrayList<>(selected);
 
     if (toSell.isEmpty()) {
-      PlayerUtils.sendMessage(player, "&cNo Pokemon selected!", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
+      PlayerUtils.sendMessage(player, UltraSTS.lang.getNoPokemonSelected(), UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
       return;
     }
 
@@ -341,12 +341,12 @@ public class STSSellMenu {
       .whenComplete((totalPrice, throwable) -> {
         if (throwable != null) {
           throwable.printStackTrace();
-          PlayerUtils.sendMessage(player, "&cError processing sale.", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
+          PlayerUtils.sendMessage(player, UltraSTS.lang.getErrorProcessingSale(), UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
           return;
         }
 
         if (totalPrice.compareTo(BigDecimal.ZERO) <= 0) {
-          PlayerUtils.sendMessage(player, "&cNo valid Pokemon were sold (perhaps they no longer exist?).", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
+          PlayerUtils.sendMessage(player, UltraSTS.lang.getNoValidPokemonSold(), UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
           return;
         }
 

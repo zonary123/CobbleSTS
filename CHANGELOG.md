@@ -2,6 +2,25 @@
 
 **IMPORTANT:** Please test the changes listed below to ensure they work correctly.
 
+## [1.6.0] - 2026-07-14
+
+### Added
+
+- Added dynamic category permission checking and display:
+    - If a user lacks permission for a category, the error message now indicates which permission is required.
+    - Supports both the default permission (`ultrasts.join.<id>`) and custom permissions set via the category's `permission` field.
+- Added translatable strings to `Lang.java` (generating `lang/en_us.json` automatically):
+    - `noPermissionCategory`: Custom error message for category permission failures (with `%permission%` placeholder).
+    - `cannotJoinCategory`, `errorSellingPokemon`, `cannotSellPokemon`: Error messages for single-pokemon selling menu.
+    - `noPokemonSelected`, `errorProcessingSale`, `noValidPokemonSold`: Error messages for multi-pokemon selling menu.
+    - `errorLoadingProfile`: Error message when failing to load user profiles in GUI menus.
+    - `reloadSuccess`: Custom reload command success message.
+    - `unknownUser`: Fallback for unknown user names in the leaderboard.
+
+### Changed
+
+- Replaced all hardcoded string literals inside menus (`STSMenu`, `STSSellMenu`, `STSCategoryMenu`, `ProfileMenu`, `LeaderBoardMenu`) and commands (`ReloadCommand`) with their corresponding fields in the language configuration.
+
 ## [1.5.4] - 2026-07-06
 
 ### Fixed

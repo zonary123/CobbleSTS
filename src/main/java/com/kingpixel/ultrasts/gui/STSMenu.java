@@ -25,7 +25,7 @@ public class STSMenu {
     User user = UltraSTS.database.getUser(player);
 
     if (user == null) {
-      PlayerUtils.sendMessage(player, "&cYou cannot join this STS category!", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
+      PlayerUtils.sendMessage(player, UltraSTS.lang.getCannotJoinCategory(), UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
       UltraSTS.lang.getMenu().open(player);
       return CompletableFuture.completedFuture(null);
     }
@@ -54,7 +54,7 @@ public class STSMenu {
         .whenComplete((sell, throwable) -> {
           if (throwable != null) {
             throwable.printStackTrace();
-            PlayerUtils.sendMessage(player, "&cAn error occurred while selling this pokemon!", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
+            PlayerUtils.sendMessage(player, UltraSTS.lang.getErrorSellingPokemon(), UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
             return;
           }
           Pokemon pokemon = pokemonButtonAction.getPokemon();
@@ -67,7 +67,7 @@ public class STSMenu {
             );
             CobbleUtils.server.execute(() -> UIManager.closeUI(player));
           } else {
-            PlayerUtils.sendMessage(player, "&cYou cannot sell this pokemon!", UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
+            PlayerUtils.sendMessage(player, UltraSTS.lang.getCannotSellPokemon(), UltraSTS.lang.getPrefix(), TypeMessage.CHAT);
           }
         }),
       close -> UltraSTS.lang.getMenu().open(player),

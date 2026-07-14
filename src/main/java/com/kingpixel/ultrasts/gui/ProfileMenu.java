@@ -38,7 +38,7 @@ public class ProfileMenu {
   public CompletableFuture<Void> open(ServerPlayerEntity player) {
     User user = UltraSTS.database.getUser(player.getUuid());
     if (user == null) {
-      player.sendMessage(AdventureTranslator.toNative("&cAn error occurred while loading your profile. Please try again later."), false);
+      player.sendMessage(AdventureTranslator.toNative(UltraSTS.lang.getErrorLoadingProfile()), false);
       return CompletableFuture.completedFuture(null);
     }
     return UltraSTS.getAsyncContext().runAsync(() -> {

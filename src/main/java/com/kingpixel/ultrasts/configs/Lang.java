@@ -25,6 +25,16 @@ public class Lang {
       "%lorepokemon%",
       "&7Sell this pokemon for STS!",
       "&7Value: %price% STS");
+  private String noPermissionCategory = "%prefix% &cYou do not have permission to enter this STS category! (Permission: %permission%)";
+  private String cannotJoinCategory = "%prefix% &cYou cannot join this STS category!";
+  private String errorSellingPokemon = "%prefix% &cAn error occurred while selling this pokemon!";
+  private String cannotSellPokemon = "%prefix% &cYou cannot sell this pokemon!";
+  private String noPokemonSelected = "%prefix% &cNo Pokemon selected!";
+  private String errorProcessingSale = "%prefix% &cError processing sale.";
+  private String noValidPokemonSold = "%prefix% &cNo valid Pokemon were sold (perhaps they no longer exist?).";
+  private String errorLoadingProfile = "&cAn error occurred while loading your profile. Please try again later.";
+  private String reloadSuccess = "UltraSTS reloaded successfully!";
+  private String unknownUser = "Unknown";
   // GUI
   private Menu menu = new Menu();
   private STSCategoryMenu stsCategoryMenu = new STSCategoryMenu();

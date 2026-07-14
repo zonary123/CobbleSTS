@@ -174,7 +174,7 @@ public class User {
 
 
   public boolean hasPermission(ServerPlayerEntity player, STS selectSTS) {
-    return PermissionApi.hasPermission(player, "ultrasts.join." + selectSTS.getId(), 2);
+    return PermissionApi.hasPermission(player, selectSTS.getPermissionRequired(), 2);
   }
 
   public void removeCooldown(STS selectSTS) {
