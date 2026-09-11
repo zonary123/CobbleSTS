@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.6.1] - 2026-09-11
+
+### Changed
+
+- **Cobblemon 1.8.0 Compatibility**: Updated to support Cobblemon 1.8.0 on Minecraft 1.21.1.
+
+### Fixed
+
+- **MongoDB Stability**: Fixed an issue where player data could fail to load when joining after a database reconnection or server reload.
+
+
 **IMPORTANT:** Please test the changes listed below to ensure they work correctly.
 
 ## [1.6.0] - 2026-07-14
@@ -105,3 +116,4 @@
 ### Changed
 
 - Users can now **disable the STS available notification individually**.
+

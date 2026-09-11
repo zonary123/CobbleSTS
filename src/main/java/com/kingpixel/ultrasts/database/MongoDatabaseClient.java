@@ -18,7 +18,13 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class MongoDatabaseClient extends DatabaseClient {
-  private MongoCollection<Document> usersCollection;
+  /**
+   * Dynamically retrieves the users collection from the active MongoDBManager.
+   * Prevents stale collection references if the connection pool is cycled or reconnected.
+   */
+  private MongoCollection<Document> getUsersCollection() {
+    return getMongoDBManager().getCollection(UltraSTS.config.getDatabase().getDatabase(), "users");
+  }
 
   /*
    * Helper method to get the MongoDBManager instance for the current database configuration.
@@ -29,9 +35,11 @@ public class MongoDatabaseClient extends DatabaseClient {
 
   @Override
   public void connect() {
-    var config = UltraSTS.config.getDatabase();
-
-    usersCollection = getMongoDBManager().getCollection(config.getDatabase(), "users");
+    try {
+      getUsersCollection().createIndex(new Document("uuid", 1));
+    } catch (Exception e) {
+      UltraSTS.LOGGER.debug("Could not create uuid index on MongoDB: {}", e.getMessage());
+    }
   }
 
   @Override
@@ -40,7 +48,7 @@ public class MongoDatabaseClient extends DatabaseClient {
       User user = getUser(uuid);
       if (user != null) return user;
 
-      Document doc = usersCollection.find(new Document("uuid", uuid.toString())).first();
+      Document doc = getUsersCollection().find(new Document("uuid", uuid.toString())).first();
       if (doc == null) return null;
 
       try {
@@ -57,7 +65,7 @@ public class MongoDatabaseClient extends DatabaseClient {
     return getMongoDBManager().runAsync(() -> {
       try {
         Document doc = user.toDocument();
-        usersCollection.replaceOne(new Document("uuid", user.getUuid().toString()), doc, new ReplaceOptions().upsert(true));
+        getUsersCollection().replaceOne(new Document("uuid", user.getUuid().toString()), doc, new ReplaceOptions().upsert(true));
 
         // Mark user as clean after successful save
         user.setDirty(false);
@@ -74,7 +82,7 @@ public class MongoDatabaseClient extends DatabaseClient {
   public CompletableFuture<List<User>> findTopUsersImpl(int limit, int page, STS sts) {
     return getMongoDBManager().supplyAsync(() -> {
       try {
-        return usersCollection.find()
+        return getUsersCollection().find()
           .sort(new Document("moneyGained." + sts.getId(), -1))
           .skip((page - 1) * limit)
           .limit(limit)
@@ -112,7 +120,7 @@ public class MongoDatabaseClient extends DatabaseClient {
           ))
           .toList();
 
-        usersCollection.bulkWrite(bulkOperations);
+        getUsersCollection().bulkWrite(bulkOperations);
 
         // Only mark as clean if bulk write succeeds
         users.forEach(user -> user.setDirty(false));
